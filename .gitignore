@@ -1,0 +1,17 @@
+# java specific
+*.class
+
+# grammar stuff
+*.tokens
+
+# eclipse stuff
+.metadata/
+mrjp.latte.generator/bin/
+mrjp.latte.generator/.settings/org.eclipse.jdt.core.prefs
+
+# generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
