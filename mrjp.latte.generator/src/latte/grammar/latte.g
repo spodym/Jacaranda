@@ -96,12 +96,11 @@ sexp
 /** types */
 
 type
-    : 'int'
-    | 'string'
-    | 'boolean'
-    | 'void'
+    : TYPE_INT
+    | TYPE_STRING
+    | TYPE_BOOLEAN
+    | TYPE_VOID
     ;
-
 TYPE_INT : 'int' ;
 TYPE_STRING : 'string' ;
 TYPE_BOOLEAN : 'boolean' ;
@@ -109,25 +108,150 @@ TYPE_VOID : 'void' ;
 
 
 /** expressions */
-/**
-evar.      Expr6 ::= Ident ;
-elitInt.   Expr6 ::= Integer ;
-elitTrue.  Expr6 ::= "true" ;
-elitFalse. Expr6 ::= "false" ;
-eapp.      Expr6 ::= Ident "(" [Expr] ")" ;
-estring.   Expr6 ::= String ;
-neg.       Expr5 ::= "-" Expr6 ;
-not.       Expr5 ::= "!" Expr6 ;
-emul.      Expr4 ::= Expr4 MulOp Expr5 ;
-eadd.      Expr3 ::= Expr3 AddOp Expr4 ;
-erel.      Expr2 ::= Expr2 RelOp Expr3 ;
-eand.      Expr1 ::= Expr2 "&&" Expr1 ;
-eor.       Expr ::= Expr1 "||" Expr ;
-coercions  Expr 6 ;
-separator  Expr "," ;*/
 
+expr6
+    : evar
+    | elitint
+    | elittrue
+    | elitfalse
+    | eapp
+    | estring
+    ;
+evar
+    : IDENT
+    ;
+elitint
+    : INTEGER
+    ;
+elittrue
+    : 'true'
+    ;
+elitfalse
+    : 'false'
+    ;
+eapp
+    : ident '(' ((expr)(',' expr)*)? ')'
+    ;
+estring
+    : STRING 
+    ;
+    
+expr5
+    : not
+    | neg
+    | expr6
+    ; 
+neg
+    : '-' expr6
+    ;
+not
+    : '!' expr6
+    ;
+    
+expr4
+    : emul
+    | expr5
+    ;
+emul
+    : expr4 mulop expr5
+    ;
+    
+expr3
+    : eadd
+    | expr4
+    ;
+eadd
+    : expr3 addop expr4
+    ;
+    
+expr2
+    : erel
+    | expr3
+    ;
+erel
+    : expr2 relop expr3
+    ;
+    
+expr1
+    : eand
+    | expr2
+    ;
+eand
+    : expr2 '&&' expr1
+    ;
+    
+expr
+    : eor
+    | expr1
+    ;
+eor
+    : expr1 '||' expr
+    ;
+
+
+/** operators */
+
+addop
+    : plus
+    | minus
+    ;
+plus
+    : '+'
+    ;
+minus
+    : '-'
+    ;
+
+mulop
+    : times
+    | div
+    | mod
+    ;
+times
+    : '*'
+    ;
+div
+    : '/'
+    ;
+mod
+    : '%'
+    ;
+
+relop
+    : lth
+    | le
+    | gth
+    | ge
+    | equ
+    | ne
+    ;
+lth
+    : '<'
+    ;
+le
+    : '<='
+    ;
+gth
+    : '>'
+    ;
+ge
+    : '>=' 
+    ;
+equ
+    : '=='
+    ;
+ne
+    : '!='
+    ;
+
+
+/** ident */
 
 ident: IDENT ;
+
+STRING
+    : '\"'('a'..'z' | 'A'..'Z' | '0'..'9')*'\"'
+    ;
 
 IDENT
     : ('a'..'z' | 'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')*
@@ -136,6 +260,7 @@ IDENT
 WHITESPACE
     : (' ' | '\t' | '\r' | '\n') { $channel = HIDDEN; }
     ;
+
 
 /** comments */
 
