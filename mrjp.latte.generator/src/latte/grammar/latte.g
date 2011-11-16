@@ -2,8 +2,7 @@ grammar latte;
 
 options {
     language = Java;
-    backtrack = true; //TODO: delete this
-    
+    backtrack = true;
 }
 
 @header {
@@ -44,7 +43,7 @@ stmt
     | vret
     | cond
     | condelse
-    | while
+    | swhile
     | sexp
     ;
 empty
@@ -82,12 +81,12 @@ vret
     : 'return' ';'
     ;
 cond
-    : 'if' '(' expr ')' stmt
+    : 'if' '(' expr ')' bstmt 
     ;
 condelse
-    : 'if' '(' expr ')' stmt 'else' stmt
+    : 'if' '(' expr ')' bstmt 'else' bstmt
     ;
-while
+swhile
     : 'while' '(' expr ')' stmt
     ;
 sexp
@@ -151,23 +150,23 @@ not
     ;
     
 emul
-    : emul (mulop expr5)?
+    : expr5 (mulop emul)?
     ;
     
 eadd
-    : eadd (addop emul)?
+    : emul (addop eadd)?
     ;
     
 erel
-    : erel (relop eadd)?
+    : eadd (relop erel)?
     ;
     
 eand
-    : erel ('&&' eand)*
+    : erel ('&&' eand)?
     ;
     
 eor
-    : eand ('||' eor)*
+    : eand ('||' eor)?
     ;
     
 expr
