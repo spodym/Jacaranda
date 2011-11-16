@@ -2,7 +2,7 @@ grammar latte;
 
 options {
     language = Java;
-    backtrack = true;
+    //backtrack = true;
 }
 
 @header {
@@ -23,7 +23,7 @@ topdef
     : type ident '(' arg? ')' block
     ;
 arg
-    : (type IDENT)(',' type IDENT)*
+    : (type ident)(',' type ident)*
     ;
 
 
@@ -42,7 +42,6 @@ stmt
     | ret
     | vret
     | cond
-    | condelse
     | swhile
     | sexp
     ;
@@ -81,10 +80,7 @@ vret
     : 'return' ';'
     ;
 cond
-    : 'if' '(' expr ')' bstmt 
-    ;
-condelse
-    : 'if' '(' expr ')' bstmt 'else' bstmt
+    : 'if' '(' expr ')' bstmt ('else' bstmt)?
     ;
 swhile
     : 'while' '(' expr ')' stmt
@@ -234,16 +230,22 @@ ne
 
 ident: IDENT ;
 
+fragment LETTER : ('a'..'z' | 'A'..'Z') ; 
+fragment DIGIT : ('0'..'9'); 
+
 INTEGER
-    : ('0'..'9')*
+    : DIGIT*
     ;
 
 STRING
-    : '\"'('a'..'z' | 'A'..'Z' | '0'..'9')*'\"'
+    :   '"' 
+        ( .
+        )*
+        '"'
     ;
 
 IDENT
-    : ('a'..'z' | 'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')*
+    : LETTER (LETTER | DIGIT)*
     ;
 
 WHITESPACE
