@@ -80,7 +80,7 @@ vret
     : 'return' ';'
     ;
 cond
-    : 'if' '(' expr ')' bstmt ('else' bstmt)?
+    : 'if' '(' expr ')' stmt ('else' stmt)?
     ;
 swhile
     : 'while' '(' expr ')' stmt
@@ -113,6 +113,7 @@ expr6
     | elitfalse
     | eapp
     | estring
+    | '(' expr ')'
     ;
 evar
     : IDENT
