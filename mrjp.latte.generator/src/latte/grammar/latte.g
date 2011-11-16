@@ -2,6 +2,8 @@ grammar latte;
 
 options {
     language = Java;
+    backtrack = true; //TODO: delete this
+    
 }
 
 @header {
@@ -148,44 +150,28 @@ not
     : '!' expr6
     ;
     
-expr4
-    : emul
-    | expr5
-    ;
 emul
-    : expr4 mulop expr5
+    : emul (mulop expr5)?
     ;
     
-expr3
-    : eadd
-    | expr4
-    ;
 eadd
-    : expr3 addop expr4
+    : eadd (addop emul)?
     ;
     
-expr2
-    : erel
-    | expr3
-    ;
 erel
-    : expr2 relop expr3
+    : erel (relop eadd)?
     ;
     
-expr1
-    : eand
-    | expr2
-    ;
 eand
-    : expr2 '&&' expr1
+    : erel ('&&' eand)*
+    ;
+    
+eor
+    : eand ('||' eor)*
     ;
     
 expr
     : eor
-    | expr1
-    ;
-eor
-    : expr1 '||' expr
     ;
 
 
@@ -248,6 +234,10 @@ ne
 /** ident */
 
 ident: IDENT ;
+
+INTEGER
+    : ('0'..'9')*
+    ;
 
 STRING
     : '\"'('a'..'z' | 'A'..'Z' | '0'..'9')*'\"'
