@@ -8,6 +8,7 @@
 .metadata/
 mrjp.latte.generator/bin/
 mrjp.latte.generator/.settings/org.eclipse.jdt.core.prefs
+mrjp.latte.generator/antlr-generated/
 
 # generic files to ignore
 *~
