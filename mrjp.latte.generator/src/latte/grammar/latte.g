@@ -26,6 +26,8 @@ tokens {
     EREL;
     EAND;
     EOR;
+    
+    NEGATION;
 }
 
 @header {
@@ -165,7 +167,7 @@ unary
     | atom
     ; 
 neg
-    : '-' atom
+    : '-' atom -> ^(NEGATION atom)
     ;
 not
     : '!' atom
