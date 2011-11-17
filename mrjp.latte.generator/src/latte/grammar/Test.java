@@ -11,7 +11,7 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 public class Test {
 	public static void main(String[] args) throws RecognitionException {
-		CharStream charStream = new ANTLRStringStream("int main() { return 1-1; }");
+		CharStream charStream = new ANTLRStringStream("int main() { return 1 - 1 - 1; } int main() { int x; x = 2 + 1; return 1 - 1 - 1; }");
 		latteLexer lexer = new latteLexer(charStream);
 		TokenStream tokenStream = new CommonTokenStream(lexer);
 		latteParser parser = new latteParser(tokenStream);

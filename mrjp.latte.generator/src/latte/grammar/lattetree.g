@@ -95,7 +95,6 @@ type
 
 /** expressions */
 
-
 atom
     : IDENT
     | INTEGER
@@ -105,14 +104,15 @@ atom
     | STRING 
     ;
     
-expr:
-    | NEGATION atom
-    | '!' atom
-    | expr (mulop expr)*
-    | expr (addop expr)*
-    | expr (relop expr)*
-    | expr ('&&' expr)?
-    | expr ('||' expr)?
+expr
+    : atom
+    | ^('!' atom)
+    | ^(NEGATION atom)
+    | ^(mulop expr expr)
+    | ^(relop expr expr)
+    | ^(addop expr expr)
+    | ^('&&' expr expr)
+    | ^('||' expr expr)
     ;
     
     

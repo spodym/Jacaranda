@@ -170,7 +170,7 @@ neg
     : '-' atom -> ^(NEGATION atom)
     ;
 not
-    : '!' atom
+    : '!'^ atom
     ;
     
 emul
