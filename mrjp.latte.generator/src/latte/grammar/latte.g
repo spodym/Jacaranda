@@ -2,7 +2,30 @@ grammar latte;
 
 options {
     language = Java;
-    //backtrack = true;
+    output=AST;
+    ASTLabelType=CommonTree;
+}
+
+tokens {
+    TOP_DEF;
+    ARGS;
+    ARG;
+    BLOCK;
+    DECL;
+    INIT;
+    ASS;
+    INCR;
+    DECR;
+    RET;
+    COND;
+    SWHILE;
+    
+    EAPP;
+    EMUL;
+    EADD;
+    EREL;
+    EAND;
+    EOR;
 }
 
 @header {
@@ -13,24 +36,26 @@ options {
     package latte.grammar;
 }
 
-
 /** program */
 
 program
-    : topdef+
+    : topdef+ EOF!
     ;
 topdef
-    : type ident '(' arg? ')' block
+    : type ident '(' args? ')' block -> ^(TOP_DEF type ident args* block)
+    ;
+args
+    : (arg)(',' arg)* -> ^(ARGS arg+)
     ;
 arg
-    : (type ident)(',' type ident)*
+    : type ident -> ^(ARG type ident)
     ;
 
 
 /** statements */
 
 block
-    : '{' stmt* '}'
+    : lc='{' stmt* '}' -> ^(BLOCK[$lc,"BLOCK"] stmt*)
     ;
 stmt
     : empty
@@ -46,13 +71,13 @@ stmt
     | sexp
     ;
 empty
-    : ';'
+    : ';'!
     ;
 bstmt
     : block
     ;
 decl
-    : type (item)(',' item)* ';'
+    : type (item)(',' item)* ';' -> ^(DECL type item+)
     ;
 item
     : noinit
@@ -62,31 +87,31 @@ noinit
     : ident
     ;
 init
-    : ident '=' expr
+    : ident '=' expr -> ^(INIT ident expr)
     ;
 ass
-    : ident '=' expr  ';'
+    : ident '=' expr  ';' -> ^(ASS ident expr)
     ;
 incr
-    : ident '++'  ';'
+    : ident '++'  ';' -> ^(INCR ident)
     ;
 decr
-    : ident '--'  ';'
+    : ident '--'  ';' -> ^(DECR ident)
     ;
 ret
-    : 'return' expr ';'
+    : 'return' expr ';' -> ^(RET expr)
     ;
 vret
-    : 'return' ';'
+    : 'return' ';'!
     ;
 cond
-    : 'if' '(' expr ')' stmt ('else' stmt)?
+    : 'if' '(' expr ')' st1=stmt ('else' st2=stmt)? -> ^(COND expr $st1 $st2)
     ;
 swhile
-    : 'while' '(' expr ')' stmt
+    : 'while' '(' expr ')' stmt -> ^(SWHILE expr stmt)
     ;
 sexp
-    : expr ';'
+    : expr ';'!
     ;
 
 
@@ -106,14 +131,14 @@ TYPE_VOID : 'void' ;
 
 /** expressions */
 
-expr6
+atom
     : evar
     | elitint
     | elittrue
     | elitfalse
     | eapp
     | estring
-    | '(' expr ')'
+    | '(' expr ')' -> expr
     ;
 evar
     : IDENT
@@ -128,42 +153,42 @@ elitfalse
     : 'false'
     ;
 eapp
-    : ident '(' ((expr)(',' expr)*)? ')'
+    : ident '(' ((expr)(',' expr)*)? ')' -> ^(EAPP ident expr*)
     ;
 estring
     : STRING 
     ;
     
-expr5
+unary
     : not
     | neg
-    | expr6
+    | atom
     ; 
 neg
-    : '-' expr6
+    : '-' atom
     ;
 not
-    : '!' expr6
+    : '!' atom
     ;
     
 emul
-    : expr5 (mulop emul)?
+    : unary (mulop^ unary)*
     ;
     
 eadd
-    : emul (addop eadd)?
+    : emul (addop^ emul)*
     ;
     
 erel
-    : eadd (relop erel)?
+    : eadd (relop^ eadd)*
     ;
     
 eand
-    : erel ('&&' eand)?
+    : erel ('&&'^ eand)?
     ;
     
 eor
-    : eand ('||' eor)?
+    : eand ('||'^ eor)?
     ;
     
 expr
@@ -177,27 +202,17 @@ addop
     : plus
     | minus
     ;
-plus
-    : '+'
-    ;
-minus
-    : '-'
-    ;
+plus : '+' ;
+minus : '-' ;
 
 mulop
     : times
     | div
     | mod
     ;
-times
-    : '*'
-    ;
-div
-    : '/'
-    ;
-mod
-    : '%'
-    ;
+times : '*' ;
+div : '/' ;
+mod : '%' ;
 
 relop
     : lth
@@ -207,24 +222,12 @@ relop
     | equ
     | ne
     ;
-lth
-    : '<'
-    ;
-le
-    : '<='
-    ;
-gth
-    : '>'
-    ;
-ge
-    : '>=' 
-    ;
-equ
-    : '=='
-    ;
-ne
-    : '!='
-    ;
+lth : '<' ;
+le : '<=' ;
+gth : '>' ;
+ge : '>=' ;
+equ : '==' ;
+ne : '!=' ;
 
 
 /** ident */
