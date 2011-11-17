@@ -107,7 +107,7 @@ vret
     : 'return' ';'!
     ;
 cond
-    : 'if' '(' expr ')' st1=stmt ('else' st2=stmt)? -> ^(COND expr $st1 $st2)
+    : 'if' '(' expr ')' stmt ('else' stmt)? -> ^(COND expr stmt+)
     ;
 swhile
     : 'while' '(' expr ')' stmt -> ^(SWHILE expr stmt)
