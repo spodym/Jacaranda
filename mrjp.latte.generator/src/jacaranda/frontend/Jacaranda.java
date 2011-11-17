@@ -26,7 +26,6 @@ public class Jacaranda {
 	public static void main(String[] args) throws RecognitionException {
 		
 		String file_path = args[0];
-		System.out.println(file_path);
 		
 		String file_data;
 		try {
@@ -35,8 +34,6 @@ public class Jacaranda {
 			
 			TreeBuilder builder = new TreeBuilder();
 			lattetree tree = builder.buildTree(file_data);
-			
-			System.out.println(file_path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
