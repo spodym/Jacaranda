@@ -10,6 +10,9 @@ mrjp.latte.generator/bin/
 mrjp.latte.generator/.settings/org.eclipse.jdt.core.prefs
 mrjp.latte.generator/antlr-generated/
 
+# tutorial
+ANTLRTutorial/
+
 # generic files to ignore
 *~
 *.lock
