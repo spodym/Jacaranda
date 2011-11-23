@@ -9,10 +9,15 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 public class TreeBuilder {
+
+	private HashMap<String, CommonTree> storage_func = new HashMap<String, CommonTree>();
+	private Stack<HashMap<String, CommonTree>> storage_vars = new Stack<HashMap<String,CommonTree>>();
 	
 	public CommonTree buildTree(String program_data) throws RecognitionException {
 		CharStream charStream = new ANTLRStringStream(program_data);
@@ -23,9 +28,39 @@ public class TreeBuilder {
 		program_return program = parser.program();
 		return program.tree;
 	}
-	
+
+	public void checkType(CommonTree root) throws TypesMismatchException {
+		loadFunctions(root);
+		checkTypes(root);
+	}
+
+	private void loadFunctions(CommonTree root) {
+		if (root.token == null) {
+			@SuppressWarnings("unchecked")
+			List<CommonTree> children = root.getChildren();
+
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					addFunction(child);
+				}
+			}			
+		} else {
+			addFunction(root);
+		}
+	}
+
+	private void addFunction(CommonTree topdef) {
+		@SuppressWarnings("unchecked")
+		List<CommonTree> func = topdef.getChildren();
+		String ident = func.get(1).token.getText();
+		System.out.println(ident);
+		
+		storage_func.put(ident, topdef);
+	}
+
 	public int checkTypes(CommonTree root) throws TypesMismatchException {
-		int token_type = root.token.getType();
+			int token_type = root.token.getType();
 		@SuppressWarnings("unchecked")
 		List<CommonTree> children = root.getChildren();
 

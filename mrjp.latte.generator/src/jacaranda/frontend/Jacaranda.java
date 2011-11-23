@@ -26,7 +26,7 @@ public class Jacaranda {
 			
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
-			builder.checkTypes(tree);
+			builder.checkType(tree);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TypesMismatchException e) {
