@@ -28,6 +28,9 @@ tokens {
     EOR;
     
     NEGATION;
+    NOT;
+    TRUE;
+    FALSE;
 }
 
 @header {
@@ -136,8 +139,8 @@ TYPE_VOID : 'void' ;
 atom
     : evar
     | elitint
-    | elittrue
-    | elitfalse
+    | 'true' -> TRUE
+    | 'false' -> FALSE
     | eapp
     | estring
     | '(' expr ')' -> expr
@@ -147,12 +150,6 @@ evar
     ;
 elitint
     : INTEGER
-    ;
-elittrue
-    : 'true'
-    ;
-elitfalse
-    : 'false'
     ;
 eapp
     : ident '(' ((expr)(',' expr)*)? ')' -> ^(EAPP ident expr*)
@@ -170,7 +167,7 @@ neg
     : '-' atom -> ^(NEGATION atom)
     ;
 not
-    : '!'^ atom
+    : '!' atom -> ^(NOT atom)
     ;
     
 emul
@@ -199,6 +196,9 @@ expr
 
 
 /** operators */
+
+OP_OR : '||' ;
+OP_AND : '&&' ; 
 
 addop
     : OP_PLUS
