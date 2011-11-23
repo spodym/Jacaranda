@@ -1,28 +1,17 @@
 package jacaranda.frontend;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import latte.grammar.TreeBuilder;
 import latte.grammar.TypesMismatchException;
-import latte.grammar.latteLexer;
-import latte.grammar.latteParser;
-import latte.grammar.lattetree;
-import latte.grammar.latteParser.program_return;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 public class Jacaranda {
 
