@@ -201,35 +201,35 @@ expr
 /** operators */
 
 addop
-    : plus
-    | minus
+    : OP_PLUS
+    | OP_MINUS
     ;
-plus : '+' ;
-minus : '-' ;
+OP_PLUS : '+' ;
+OP_MINUS : '-' ;
 
 mulop
-    : times
-    | div
-    | mod
+    : OP_TIMES
+    | OP_DIV
+    | OP_MOD
     ;
-times : '*' ;
-div : '/' ;
-mod : '%' ;
+OP_TIMES : '*' ;
+OP_DIV : '/' ;
+OP_MOD: '%' ;
 
 relop
-    : lth
-    | le
-    | gth
-    | ge
-    | equ
-    | ne
+    : OP_LTH
+    | OP_LE
+    | OP_GTH
+    | OP_GE
+    | OP_EQU
+    | OP_NE
     ;
-lth : '<' ;
-le : '<=' ;
-gth : '>' ;
-ge : '>=' ;
-equ : '==' ;
-ne : '!=' ;
+OP_LTH : '<' ;
+OP_LE : '<=' ;
+OP_GTH : '>' ;
+OP_GE : '>=' ;
+OP_EQU : '==' ;
+OP_NE : '!=' ;
 
 
 /** ident */
