@@ -12,6 +12,7 @@ tokens {
     ARG;
     BLOCK;
     DECL;
+    NOINIT;
     INIT;
     ASS;
     INCR;
@@ -31,6 +32,12 @@ tokens {
     NOT;
     TRUE;
     FALSE;
+    VAR_IDENT;
+    
+    TYPE_INT;
+    TYPE_STRING;
+    TYPE_BOOLEAN;
+    TYPE_VOID;
 }
 
 @header {
@@ -89,7 +96,7 @@ item
     | init
     ;
 noinit
-    : ident
+    : ident -> ^(NOINIT ident)
     ;
 init
     : ident '=' expr -> ^(INIT ident expr)
@@ -123,15 +130,11 @@ sexp
 /** types */
 
 type
-    : TYPE_INT
-    | TYPE_STRING
-    | TYPE_BOOLEAN
-    | TYPE_VOID
+    : 'int' -> TYPE_INT
+    | 'string' -> TYPE_STRING
+    | 'boolean' -> TYPE_BOOLEAN
+    | 'void' -> TYPE_VOID
     ;
-TYPE_INT : 'int' ;
-TYPE_STRING : 'string' ;
-TYPE_BOOLEAN : 'boolean' ;
-TYPE_VOID : 'void' ;
 
 
 /** expressions */
@@ -146,7 +149,7 @@ atom
     | '(' expr ')' -> expr
     ;
 evar
-    : IDENT
+    : ident -> ^(VAR_IDENT ident)
     ;
 elitint
     : INTEGER

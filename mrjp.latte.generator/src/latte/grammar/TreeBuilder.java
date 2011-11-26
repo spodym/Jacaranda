@@ -17,7 +17,7 @@ import java.util.Stack;
 public class TreeBuilder {
 
 	private HashMap<String, CommonTree> storage_func = new HashMap<String, CommonTree>();
-	private Stack<HashMap<String, CommonTree>> storage_vars = new Stack<HashMap<String,CommonTree>>();
+	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
 	
 	public CommonTree buildTree(String program_data) throws RecognitionException {
 		CharStream charStream = new ANTLRStringStream(program_data);
@@ -30,6 +30,7 @@ public class TreeBuilder {
 	}
 
 	public void checkType(CommonTree root) throws TypesMismatchException {
+		lookupVar("dd");
 		loadFunctions(root);
 		checkTypes(root);
 	}
@@ -54,13 +55,25 @@ public class TreeBuilder {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> func = topdef.getChildren();
 		String ident = func.get(1).token.getText();
-		System.out.println(ident);
 		
 		storage_func.put(ident, topdef);
 	}
+	
+	private int lookupVar(String ident) {
+		for(int i = storage_vars.size()-1; i >= 0; i--) {
+			HashMap<String,Integer> locVar = storage_vars.get(i);
+			if (locVar.containsKey(ident)) {
+				return locVar.get(ident);
+			}
+		}
+		return -1;
+	}
 
 	public int checkTypes(CommonTree root) throws TypesMismatchException {
-			int token_type = root.token.getType();
+		int token_type = -1;
+		if (root.token != null) {
+			token_type = root.token.getType();
+		}
 		@SuppressWarnings("unchecked")
 		List<CommonTree> children = root.getChildren();
 
@@ -152,11 +165,63 @@ public class TreeBuilder {
 			return latteParser.TYPE_BOOLEAN;
 		case latteParser.STRING:
 			return latteParser.TYPE_STRING;
-		case latteParser.IDENT:
-			return -1;
-		case latteParser.EAPP:
-			return -1;
+		case latteParser.VAR_IDENT:
+			int result = lookupVar(children.get(0).token.getText());
+			if (result != -1) {
+				return lookupVar(children.get(0).token.getText());
+			} else {
+				throw new TypesMismatchException("unknown variable");
+			}
 			
+		case latteParser.EAPP:
+			CommonTree func = storage_func.get(children.get(0).token.getText());
+			// TODO: args type cheking...
+			return checkTypes((CommonTree)func.getChildren().get(0));
+			
+//		case latteParser.ASS:
+//			return checkTypes((CommonTree)func.getChildren().get(0));
+			
+		case latteParser.BLOCK: {
+			if (children != null) {
+				// new block vars
+				storage_vars.push(new HashMap<String, Integer>());
+
+				// iterating with new variables block
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					checkTypes(child);
+				}
+				
+				// old block vars
+				storage_vars.pop();
+			}
+			break;
+		}
+
+		case latteParser.DECL: {
+			int type = children.get(0).token.getType();
+			for(int i = 1; i < children.size(); i++) {
+				CommonTree child = children.get(i);
+				@SuppressWarnings("unchecked")
+				List<CommonTree> declaration = child.getChildren();
+				String ident = declaration.get(0).token.getText();
+
+				if (lookupVar(ident) != -1) {
+					throw new TypesMismatchException("already exists");
+				}
+				
+				if (child.token.getType() == latteParser.INIT) {
+					int currType = checkTypes(declaration.get(1));
+					if (type != currType) {
+						throw new TypesMismatchException("Mismatch");
+					}
+				}
+
+				storage_vars.peek().put(ident, type);
+			}
+			break;
+		}
+
 		default: {
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
@@ -167,7 +232,7 @@ public class TreeBuilder {
 			break;
 		}
 		}
-		
+
 		return token_type;
 	}
 }

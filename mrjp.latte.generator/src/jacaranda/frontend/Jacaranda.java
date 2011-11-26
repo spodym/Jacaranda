@@ -9,25 +9,35 @@ import java.nio.charset.Charset;
 
 import latte.grammar.TreeBuilder;
 import latte.grammar.TypesMismatchException;
+//import latte.grammar.lattetree;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
+//import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 public class Jacaranda {
 
-	public static void main(String[] args) throws RecognitionException {
+	public static void main(String[] args) {
 		
 		String file_path = args[0];
 		
 		String file_data;
 		try {
 			file_data = readFile(file_path);
-			System.out.println(file_data);
+			System.err.println(file_data);
 			
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
+
+//	        CommonTreeNodeStream nodeStream = new CommonTreeNodeStream(tree);
+//	        lattetree walker = new lattetree(nodeStream);
+//	        walker.program();
+
+			System.err.println(tree.toStringTree());
 			builder.checkType(tree);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (RecognitionException e) {
 			e.printStackTrace();
 		} catch (TypesMismatchException e) {
 			e.printStackTrace();
