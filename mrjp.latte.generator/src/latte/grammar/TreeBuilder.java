@@ -165,21 +165,34 @@ public class TreeBuilder {
 			return latteParser.TYPE_BOOLEAN;
 		case latteParser.STRING:
 			return latteParser.TYPE_STRING;
-		case latteParser.VAR_IDENT:
+		case latteParser.VAR_IDENT: {
 			int result = lookupVar(children.get(0).token.getText());
 			if (result != -1) {
 				return lookupVar(children.get(0).token.getText());
 			} else {
 				throw new TypesMismatchException("unknown variable");
 			}
+		}
 			
-		case latteParser.EAPP:
+		case latteParser.EAPP: {
 			CommonTree func = storage_func.get(children.get(0).token.getText());
 			// TODO: args type cheking...
 			return checkTypes((CommonTree)func.getChildren().get(0));
+		}
 			
-//		case latteParser.ASS:
-//			return checkTypes((CommonTree)func.getChildren().get(0));
+		case latteParser.ASS: {
+			int type = lookupVar(children.get(0).token.getText());
+			if (type != -1) {
+				int currType = checkTypes(children.get(1));
+				if (type != currType) {
+					throw new TypesMismatchException("Mismatch in assignment");
+				}
+			} else {
+				throw new TypesMismatchException("unknown variable");
+			}
+			
+			break;
+		}
 			
 		case latteParser.BLOCK: {
 			if (children != null) {

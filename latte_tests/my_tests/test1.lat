@@ -5,6 +5,7 @@ int main() {
         int d;
         d = b;
     }
-    d = 1;
+    boolean u;
+    u = true;
     return 1;
 }
