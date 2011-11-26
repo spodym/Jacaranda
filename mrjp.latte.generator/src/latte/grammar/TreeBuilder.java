@@ -179,7 +179,7 @@ public class TreeBuilder {
 			// TODO: args type cheking...
 			return checkTypes((CommonTree)func.getChildren().get(0));
 		}
-			
+		
 		case latteParser.ASS: {
 			int type = lookupVar(children.get(0).token.getText());
 			if (type != -1) {
@@ -189,6 +189,18 @@ public class TreeBuilder {
 				}
 			} else {
 				throw new TypesMismatchException("unknown variable");
+			}
+			
+			break;
+		}
+
+		case latteParser.DECR:
+		case latteParser.INCR: {
+			int type = lookupVar(children.get(0).token.getText());
+			if (type == -1) {
+				throw new TypesMismatchException("unknown variable");
+			} else if (type != latteParser.TYPE_INT) {
+				throw new TypesMismatchException("wrong type in incr/decr");
 			}
 			
 			break;
