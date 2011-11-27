@@ -24,12 +24,12 @@ public class Jacaranda {
 		String file_data;
 		try {
 			file_data = readFile(file_path);
-			System.err.println(file_data);
+//			System.err.println(file_data);
 			
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 
-			System.err.println(tree.toStringTree());
+//			System.err.println(tree.toStringTree());
 			builder.checkType(tree);
 		} catch (IOException e) {
 			e.printStackTrace();

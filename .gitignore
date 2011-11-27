@@ -17,6 +17,9 @@ jacaranda_jar.xml
 # tutorial
 ANTLRTutorial/
 
+# for testing
+latte_tests/my_tests/test1.lat
+
 # generic files to ignore
 *~
 *.lock

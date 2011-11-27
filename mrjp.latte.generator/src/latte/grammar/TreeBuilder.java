@@ -184,13 +184,11 @@ public class TreeBuilder {
 					boolean rret = isNotReturn((CommonTree)commonTree.getChild(2), false);
 					result = (lret || rret);
 				}
-			}
-			if (commonTree.getChildren().size() == 2) {
+			} else {
 				CommonTree expr = (CommonTree)commonTree.getChild(1);
-				if (expr.token.getType() == latteParser.FALSE) {
-					result = true;
+				if (expr.token.getType() == latteParser.TRUE) {
+					result = isNotReturn((CommonTree)commonTree.getChild(1), true);
 				}
-				result = isNotReturn((CommonTree)commonTree.getChild(1), true);
 			}
 			
 			if (result) {
