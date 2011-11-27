@@ -78,7 +78,7 @@ public class TreeBuilder {
 				isNotReturn(children.get(i), true);
 			}
 			return isReturn(children.get(children.size()-1), expectedReturn);
-		} else if (expectedReturn != latteParser.RETV) {
+		} else if (expectedReturn != latteParser.TYPE_VOID) {
 			throw new TypesMismatchException("Return was expected at the end.");
 		}
 		
@@ -105,9 +105,23 @@ public class TreeBuilder {
 		case latteParser.COND: {
 			boolean result = false;
 			if (commonTree.getChildren().size() == 3) {
-				boolean lret = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
-				boolean rret = isReturn((CommonTree)commonTree.getChild(2), expectedReturn);
-				result = (lret && rret);
+				CommonTree expr = (CommonTree)commonTree.getChild(0);
+				if (expr.token.getType() == latteParser.TRUE) {
+					result = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
+				} else if (expr.token.getType() == latteParser.FALSE) {
+					result = isReturn((CommonTree)commonTree.getChild(2), expectedReturn);
+				} else {
+					boolean lret = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
+					boolean rret = isReturn((CommonTree)commonTree.getChild(2), expectedReturn);
+					result = (lret && rret);
+				}
+			} else {
+				CommonTree expr = (CommonTree)commonTree.getChild(0);
+				if (expr.token.getType() == latteParser.FALSE) {
+					result = false;
+				} else {
+					result = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
+				}
 			}
 			return result;
 		}
@@ -158,10 +172,25 @@ public class TreeBuilder {
 
 		case latteParser.COND:
 			boolean result = true;
+
 			if (commonTree.getChildren().size() == 3) {
-				boolean lret = isNotReturn((CommonTree)commonTree.getChild(1), false);
-				boolean rret = isNotReturn((CommonTree)commonTree.getChild(2), false);
-				result = (lret || rret);
+				CommonTree expr = (CommonTree)commonTree.getChild(1);
+				if (expr.token.getType() == latteParser.TRUE) {
+					result = isNotReturn((CommonTree)commonTree.getChild(1), true);
+				} else if (expr.token.getType() == latteParser.FALSE) {
+					result = isNotReturn((CommonTree)commonTree.getChild(2), true);
+				} else {
+					boolean lret = isNotReturn((CommonTree)commonTree.getChild(1), false);
+					boolean rret = isNotReturn((CommonTree)commonTree.getChild(2), false);
+					result = (lret || rret);
+				}
+			}
+			if (commonTree.getChildren().size() == 2) {
+				CommonTree expr = (CommonTree)commonTree.getChild(1);
+				if (expr.token.getType() == latteParser.FALSE) {
+					result = true;
+				}
+				result = isNotReturn((CommonTree)commonTree.getChild(1), true);
 			}
 			
 			if (result) {
@@ -481,6 +510,14 @@ public class TreeBuilder {
 			}
 			break;
 		}
+
+//		case latteParser.COND: {
+//			CommonTree expr = children.get(0);
+//			if (expr.token.getType() == latteParser.TRUE) {
+//				root.replaceChildren(0, 0, 0);// = children.get(1);
+//			}
+//			break;
+//		}
 
 		default: {
 			if (children != null) {
