@@ -29,10 +29,6 @@ public class Jacaranda {
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 
-//	        CommonTreeNodeStream nodeStream = new CommonTreeNodeStream(tree);
-//	        lattetree walker = new lattetree(nodeStream);
-//	        walker.program();
-
 			System.err.println(tree.toStringTree());
 			builder.checkType(tree);
 		} catch (IOException e) {

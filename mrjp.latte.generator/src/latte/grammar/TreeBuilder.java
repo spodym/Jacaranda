@@ -9,8 +9,6 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
-import antlr.StringUtils;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,17 +37,34 @@ public class TreeBuilder {
 
 	private void checkReturns() throws TypesMismatchException {
 		for (Iterator<CommonTree> iterator = storage_func.values().iterator(); iterator.hasNext();) {
-			@SuppressWarnings("unchecked")
-			List<CommonTree> topdef = iterator.next().getChildren();
-
-			int expectedReturn = topdef.get(0).token.getType();
-			CommonTree blockLookup;
-			if (topdef.get(2).token.getType() == latteParser.BLOCK) {
-				blockLookup = topdef.get(2);
-			} else {
-				blockLookup = topdef.get(3);
+			CommonTree fun = iterator.next();
+			if (fun != null) {
+				@SuppressWarnings("unchecked")
+				List<CommonTree> topdef = fun.getChildren();
+	
+				int expectedReturn = topdef.get(0).token.getType();
+				CommonTree blockLookup;
+				if (topdef.get(2).token.getType() == latteParser.BLOCK) {
+					blockLookup = topdef.get(2);
+				} else {
+					blockLookup = topdef.get(3);
+				}
+	
+				storage_vars.push(new HashMap<String, Integer>());
+				CommonTree args = topdef.get(2);
+				if (args.getType() == latteParser.ARGS) {
+					@SuppressWarnings("unchecked")
+					List<CommonTree> argsToLoad = args.getChildren();
+					for(int i = 0; i < argsToLoad.size(); i++) {
+						CommonTree arg = argsToLoad.get(i);
+						String ident = arg.getChild(1).getText();
+						int type = arg.getChild(0).getType();
+						storage_vars.peek().put(ident, type);
+					}
+				}
+				returnLookup(expectedReturn, blockLookup);
+				storage_vars.pop();
 			}
-			returnLookup(expectedReturn, blockLookup);
 		}
 	}
 
@@ -87,19 +102,37 @@ public class TreeBuilder {
 			}
 			return true;
 
-		case latteParser.COND:
-			boolean result;
+		case latteParser.COND: {
+			boolean result = false;
 			if (commonTree.getChildren().size() == 3) {
 				boolean lret = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
 				boolean rret = isReturn((CommonTree)commonTree.getChild(2), expectedReturn);
 				result = (lret && rret);
-			} else {
-				result = isNotReturn((CommonTree)commonTree.getChild(1), false);
 			}
 			return result;
+		}
 
-		case latteParser.BLOCK:
-			return returnLookup(expectedReturn, commonTree);
+		case latteParser.BLOCK: {
+			storage_vars.push(new HashMap<String, Integer>());
+			boolean result = returnLookup(expectedReturn, commonTree);
+			storage_vars.pop();
+			
+			return result;
+		}
+		
+		case latteParser.DECL: {
+			@SuppressWarnings("unchecked")
+			List<CommonTree> decl = commonTree.getChildren();
+			int varType = decl.get(0).token.getType();
+			for(int i = 1; i < decl.size(); i++) {
+				CommonTree child = decl.get(i);
+				@SuppressWarnings("unchecked")
+				List<CommonTree> declaration = child.getChildren();
+				String ident = declaration.get(0).token.getText();
+				storage_vars.peek().put(ident, varType);
+			}
+			break;
+		}
 
 		default:
 			if (expectedReturn != latteParser.TYPE_VOID) {
@@ -124,14 +157,13 @@ public class TreeBuilder {
 			}
 
 		case latteParser.COND:
-			boolean result;
+			boolean result = true;
 			if (commonTree.getChildren().size() == 3) {
 				boolean lret = isNotReturn((CommonTree)commonTree.getChild(1), false);
 				boolean rret = isNotReturn((CommonTree)commonTree.getChild(2), false);
 				result = (lret || rret);
-			} else {
-				result = isNotReturn((CommonTree)commonTree.getChild(1), false);
 			}
+			
 			if (result) {
 				return true;
 			} else {
@@ -143,6 +175,7 @@ public class TreeBuilder {
 			}
 
 		case latteParser.BLOCK:
+			storage_vars.push(new HashMap<String, Integer>());
 			@SuppressWarnings("unchecked")
 			List<CommonTree> children = commonTree.getChildren();
 			if (children != null) {
@@ -151,8 +184,24 @@ public class TreeBuilder {
 					isNotReturn(child, true);
 				}
 			}
+			storage_vars.pop();
+			
 			break;
 
+		case latteParser.DECL: {
+			@SuppressWarnings("unchecked")
+			List<CommonTree> decl = commonTree.getChildren();
+			int varType = decl.get(0).token.getType();
+			for(int i = 1; i < decl.size(); i++) {
+				CommonTree child = decl.get(i);
+				@SuppressWarnings("unchecked")
+				List<CommonTree> declaration = child.getChildren();
+				String ident = declaration.get(0).token.getText();
+				storage_vars.peek().put(ident, varType);
+			}
+			break;
+		}
+			
 		default:
 			break;
 		}
@@ -241,9 +290,6 @@ public class TreeBuilder {
 			int type_left = checkTypes(children.get(0));
 			int type_right = checkTypes(children.get(1));
 
-			System.out.println(type_left);
-			System.out.println(type_right);
-
 			if (type_left != type_right ||
 					type_left != latteParser.TYPE_INT) {
 				throw new TypesMismatchException("Mismatch");
@@ -257,9 +303,6 @@ public class TreeBuilder {
 		case latteParser.OP_NE: {
 			int type_left = checkTypes(children.get(0));
 			int type_right = checkTypes(children.get(1));
-
-			System.out.println(type_left);
-			System.out.println(type_right);
 
 			if (type_left != type_right ||
 					(type_left != latteParser.TYPE_INT &&
