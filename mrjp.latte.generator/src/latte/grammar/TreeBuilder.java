@@ -339,7 +339,7 @@ public class TreeBuilder {
 			return latteParser.TYPE_BOOLEAN;
 		}
 		
-		// int int || bool bool
+		// int int || bool bool -> bool
 		case latteParser.OP_EQU:
 		case latteParser.OP_NE: {
 			int type_left = checkTypes(children.get(0));
@@ -351,7 +351,7 @@ public class TreeBuilder {
 				throw new TypesMismatchException("Mismatch");
 			}
 
-			return type_left;
+			return latteParser.TYPE_BOOLEAN;
 		}
 		
 		// bool bool
