@@ -8,7 +8,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import latte.grammar.TreeBuilder;
-import latte.grammar.TypesMismatchException;
+import latte.grammar.LatteException;
 //import latte.grammar.lattetree;
 
 import org.antlr.runtime.RecognitionException;
@@ -35,7 +35,7 @@ public class Jacaranda {
 			e.printStackTrace();
 		} catch (RecognitionException e) {
 			e.printStackTrace();
-		} catch (TypesMismatchException e) {
+		} catch (LatteException e) {
 			e.printStackTrace();
 		}
 	}
