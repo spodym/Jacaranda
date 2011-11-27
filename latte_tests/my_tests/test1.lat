@@ -1,5 +1,5 @@
 int main(int a, int b) {
-    int a = 1, b, c;
+    /*int a = 1, b, c;
     {
         b = c + 1;
         int d;
@@ -8,5 +8,5 @@ int main(int a, int b) {
     boolean u;
     a = main(b,a);
     a++;
-    return 1;
+    return 1;*/
 }

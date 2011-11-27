@@ -18,6 +18,7 @@ tokens {
     INCR;
     DECR;
     RET;
+    RETV;
     COND;
     SWHILE;
     
@@ -114,7 +115,7 @@ ret
     : 'return' expr ';' -> ^(RET expr)
     ;
 vret
-    : 'return' ';'!
+    : 'return' ';' -> ^(RETV)
     ;
 cond
     : 'if' '(' expr ')' stmt ('else' stmt)? -> ^(COND expr stmt+)
@@ -160,7 +161,7 @@ eapp
 estring
     : STRING 
     ;
-    
+
 unary
     : not
     | neg
