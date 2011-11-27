@@ -51,37 +51,53 @@ public class TreeBuilder {
 		}
 	}
 
-	private void returnLookup(int expectedReturn, CommonTree blockLookup) throws TypesMismatchException {
+	private boolean returnLookup(int expectedReturn, CommonTree blockLookup) throws TypesMismatchException {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> children = blockLookup.getChildren();
 		
 		// Only last stmt can be return
 		if (children != null) {
 			for (int i = 0; i < children.size() - 1; i++) {
-				isNotReturn(children.get(i));
+				isNotReturn(children.get(i), true);
 			}
-			isReturn(children.get(children.size()-1), expectedReturn);
+			return isReturn(children.get(children.size()-1), expectedReturn);
 		} else if (expectedReturn != latteParser.RETV) {
 			throw new TypesMismatchException("Return was expected at the end.");
 		}
+		
+		return false;
 	}
 
-	private void isReturn(CommonTree commonTree, int expectedReturn) throws TypesMismatchException {
+	private boolean isReturn(CommonTree commonTree, int expectedReturn) throws TypesMismatchException {
 		int type = commonTree.token.getType();
 		
 		switch (type) {
 		case latteParser.RET:
-			break;
-
+			int givenType = checkTypes((CommonTree)commonTree.getChild(0)); 
+			if (expectedReturn != givenType) {
+				throw new TypesMismatchException("Return type mismatch.");
+			}
+			return true;
+			
 		case latteParser.RETV:
-			break;
+			if (expectedReturn != latteParser.TYPE_VOID) {
+				throw new TypesMismatchException("Return type mismatch 2.");
+			}
+			return true;
 
 		case latteParser.COND:
-			break;
+			boolean result;
+			if (commonTree.getChildren().size() == 3) {
+				boolean lret = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
+				boolean rret = isReturn((CommonTree)commonTree.getChild(2), expectedReturn);
+				result = (lret && rret);
+			} else {
+				result = isNotReturn((CommonTree)commonTree.getChild(1), false);
+			}
+			return result;
 
 		case latteParser.BLOCK:
-			returnLookup(expectedReturn, commonTree);
-			break;
+			return returnLookup(expectedReturn, commonTree);
 
 		default:
 			if (expectedReturn != latteParser.TYPE_VOID) {
@@ -89,32 +105,57 @@ public class TreeBuilder {
 			}
 			break;
 		}
+		
+		return false;
 	}
 
-	private void isNotReturn(CommonTree commonTree) throws TypesMismatchException {
+	private boolean isNotReturn(CommonTree commonTree, boolean topLevel) throws TypesMismatchException {
 		int type = commonTree.token.getType();
 		
 		switch (type) {
 		case latteParser.RET:
 		case latteParser.RETV:
-			throw new TypesMismatchException("Return earlier than end of block");
+			if (topLevel) {
+				throw new TypesMismatchException("Return earlier than end of block");	
+			} else {
+				return false;
+			}
 
 		case latteParser.COND:
-			break;
+			boolean result;
+			if (commonTree.getChildren().size() == 3) {
+				boolean lret = isNotReturn((CommonTree)commonTree.getChild(1), false);
+				boolean rret = isNotReturn((CommonTree)commonTree.getChild(2), false);
+				result = (lret || rret);
+			} else {
+				result = isNotReturn((CommonTree)commonTree.getChild(1), false);
+			}
+			if (result) {
+				return true;
+			} else {
+				if (topLevel) {
+					throw new TypesMismatchException("Return earlier than end of block");	
+				} else {
+					return false;
+				}
+			}
 
 		case latteParser.BLOCK:
-			break;
-
-		default:
 			@SuppressWarnings("unchecked")
 			List<CommonTree> children = commonTree.getChildren();
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
 					CommonTree child = i.next();
-					isNotReturn(child);
+					isNotReturn(child, true);
 				}
 			}
+			break;
+
+		default:
+			break;
 		}
+		
+		return true;
 	}
 
 	private void loadFunctions(CommonTree root) throws TypesMismatchException {

@@ -1,7 +1,3 @@
-int f(int x) {
-   return x;
-}
-
-int d(int y) {
-   return f(y);
+int main() {
+    return true;
 }
