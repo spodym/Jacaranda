@@ -9,6 +9,8 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
+import antlr.StringUtils;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -159,6 +161,10 @@ public class TreeBuilder {
 	}
 
 	private void loadFunctions(CommonTree root) throws TypesMismatchException {
+		// lang defined functions
+		storage_func.put("printString", null);
+		storage_func.put("printInt", null);
+		
 		if (root.token == null) {
 			@SuppressWarnings("unchecked")
 			List<CommonTree> children = root.getChildren();
@@ -306,6 +312,13 @@ public class TreeBuilder {
 			if (!lookupFun(funName)) {
 				throw new TypesMismatchException("No such function");
 			}
+
+			if (funName.compareTo("printString") == 0) { 
+				return checkPrintString(children); 
+			}
+			if (funName.compareTo("printInt") == 0) { 
+				return checkPrintInt(children); 
+			}
 			
 			CommonTree func = storage_func.get(funName);
 			CommonTree args = (CommonTree)func.getChildren().get(2);
@@ -321,7 +334,7 @@ public class TreeBuilder {
 					int givenType = checkTypes(children.get(i+1));
 					int expectedType = argsList.get(i).getChild(0).getType();
 					if (givenType != expectedType) {
-						throw new TypesMismatchException("Expected different type argument.");
+						throw new TypesMismatchException("Expected `different type argument.");
 					}
 				}
 			} else if (children.size()-1 != 0) {
@@ -438,5 +451,29 @@ public class TreeBuilder {
 		}
 
 		return token_type;
+	}
+
+	private int checkPrintString(List<CommonTree> children) throws TypesMismatchException {
+		if (children.size()-1 != 1) {
+			throw new TypesMismatchException("printStr expects one argument.");
+		}
+		int givenType = checkTypes(children.get(1));
+		int expectedType = latteParser.TYPE_STRING;
+		if (givenType != expectedType) {
+			throw new TypesMismatchException("Expected `different type argument.");
+		}
+		return expectedType;
+	}
+
+	private int checkPrintInt(List<CommonTree> children) throws TypesMismatchException {
+		if (children.size()-1 != 1) {
+			throw new TypesMismatchException("printInt expects one argument.");
+		}
+		int givenType = checkTypes(children.get(1));
+		int expectedType = latteParser.TYPE_INT;
+		if (givenType != expectedType) {
+			throw new TypesMismatchException("Expected `different type argument.");
+		}
+		return expectedType;
 	}
 }
