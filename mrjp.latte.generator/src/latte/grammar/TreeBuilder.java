@@ -136,8 +136,8 @@ public class TreeBuilder {
 	private void addFunction(CommonTree topdef) {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> func = topdef.getChildren();
-		String ident = func.get(1).token.getText();
 		
+		String ident = func.get(1).token.getText();
 		storage_func.put(ident, topdef);
 	}
 	
@@ -303,12 +303,12 @@ public class TreeBuilder {
 			
 			break;
 		}
-			
+		
 		case latteParser.BLOCK: {
 			if (children != null) {
 				// new block vars
 				storage_vars.push(new HashMap<String, Integer>());
-
+	
 				// iterating with new variables block
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
 					CommonTree child = i.next();
@@ -318,6 +318,34 @@ public class TreeBuilder {
 				// old block vars
 				storage_vars.pop();
 			}
+			break;
+		}
+	
+		case latteParser.TOP_DEF: {
+			// new block vars
+			storage_vars.push(new HashMap<String, Integer>());
+
+			// checking args integrity
+			CommonTree args = children.get(2);
+			if (args.getType() == latteParser.ARGS) {
+				@SuppressWarnings("unchecked")
+				List<CommonTree> argsToLoad = args.getChildren();
+				for(int i = 0; i < argsToLoad.size(); i++) {
+					CommonTree arg = argsToLoad.get(i);
+					String ident = arg.getChild(1).getText();
+					int type = arg.getChild(0).getType();
+					if (lookupVar(arg.getChild(1).getText()) != -1) {
+						throw new TypesMismatchException("funct declr: already exists");
+					}
+					storage_vars.peek().put(ident, type);
+				}
+				checkTypes(children.get(3));
+			} else {
+				checkTypes(children.get(2));
+			}
+			
+			// old block vars
+			storage_vars.pop();
 			break;
 		}
 

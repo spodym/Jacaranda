@@ -1,12 +1,11 @@
-int main(int a, int b) {
-    /*int a = 1, b, c;
-    {
-        b = c + 1;
-        int d;
-        d = b;
-    }
-    boolean u;
-    a = main(b,a);
-    a++;
-    return 1;*/
+int f(int x) {
+   return x;
+}
+
+int f(int x) {
+   return x;
+}
+
+int f(int x) {
+   return x;
 }
