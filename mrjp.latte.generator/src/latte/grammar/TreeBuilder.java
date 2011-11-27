@@ -309,7 +309,19 @@ public class TreeBuilder {
 		case latteParser.OP_MINUS:
 		case latteParser.OP_TIMES:
 		case latteParser.OP_DIV:
-		case latteParser.OP_MOD:
+		case latteParser.OP_MOD: {
+			int type_left = checkTypes(children.get(0));
+			int type_right = checkTypes(children.get(1));
+
+			if (type_left != type_right ||
+					type_left != latteParser.TYPE_INT) {
+				throw new TypesMismatchException("Mismatch");
+			}
+
+			return latteParser.TYPE_INT;
+		}
+		
+		// int int -> bool
 		case latteParser.OP_LTH:
 		case latteParser.OP_LE:
 		case latteParser.OP_GTH:
@@ -322,7 +334,7 @@ public class TreeBuilder {
 				throw new TypesMismatchException("Mismatch");
 			}
 
-			return type_left;
+			return latteParser.TYPE_BOOLEAN;
 		}
 		
 		// int int || bool bool
@@ -404,7 +416,7 @@ public class TreeBuilder {
 					int givenType = checkTypes(children.get(i+1));
 					int expectedType = argsList.get(i).getChild(0).getType();
 					if (givenType != expectedType) {
-						throw new TypesMismatchException("Expected `different type argument.");
+						throw new TypesMismatchException("Expected different type argument.");
 					}
 				}
 			} else if (children.size()-1 != 0) {
