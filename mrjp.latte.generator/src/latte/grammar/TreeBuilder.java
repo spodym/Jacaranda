@@ -240,6 +240,8 @@ public class TreeBuilder {
 		// lang defined functions
 		storage_func.put("printString", null);
 		storage_func.put("printInt", null);
+		storage_func.put("readString", null);
+		storage_func.put("readInt", null);
 		
 		if (root.token == null) {
 			@SuppressWarnings("unchecked")
@@ -352,6 +354,20 @@ public class TreeBuilder {
 			return type_left;
 		}
 		
+		// bool bool
+		case latteParser.OP_AND:
+		case latteParser.OP_OR: {
+			int type_left = checkTypes(children.get(0));
+			int type_right = checkTypes(children.get(1));
+
+			if (type_left != type_right ||
+					type_left != latteParser.TYPE_BOOLEAN) {
+				throw new TypesMismatchException("Mismatch");
+			}
+
+			return type_left;
+		}
+		
 		case latteParser.NEGATION: {
 			int type_left = checkTypes(children.get(0));
 
@@ -400,6 +416,12 @@ public class TreeBuilder {
 			}
 			if (funName.compareTo("printInt") == 0) { 
 				return checkPrintInt(children); 
+			}
+			if (funName.compareTo("readString") == 0) { 
+				return checkReadString(children); 
+			}
+			if (funName.compareTo("readInt") == 0) { 
+				return checkReadInt(children); 
 			}
 			
 			CommonTree func = storage_func.get(funName);
@@ -543,6 +565,20 @@ public class TreeBuilder {
 		return token_type;
 	}
 
+	private int checkReadInt(List<CommonTree> children) throws TypesMismatchException {
+		if (children.size()-1 != 0) {
+			throw new TypesMismatchException("printStr expects zero argument.");
+		}
+		return latteParser.TYPE_INT;
+	}
+
+	private int checkReadString(List<CommonTree> children) throws TypesMismatchException {
+		if (children.size()-1 != 0) {
+			throw new TypesMismatchException("printStr expects zero argument.");
+		}
+		return latteParser.TYPE_STRING;
+	}
+
 	private int checkPrintString(List<CommonTree> children) throws TypesMismatchException {
 		if (children.size()-1 != 1) {
 			throw new TypesMismatchException("printStr expects one argument.");
@@ -552,7 +588,7 @@ public class TreeBuilder {
 		if (givenType != expectedType) {
 			throw new TypesMismatchException("Expected `different type argument.");
 		}
-		return expectedType;
+		return latteParser.TYPE_VOID;
 	}
 
 	private int checkPrintInt(List<CommonTree> children) throws TypesMismatchException {
@@ -564,6 +600,6 @@ public class TreeBuilder {
 		if (givenType != expectedType) {
 			throw new TypesMismatchException("Expected `different type argument.");
 		}
-		return expectedType;
+		return latteParser.TYPE_VOID;
 	}
 }
