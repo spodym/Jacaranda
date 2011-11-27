@@ -77,9 +77,6 @@ public class TreeBuilder {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> children = root.getChildren();
 
-//		System.out.println(token_type);
-//		System.out.println(root.token.getText());
-		
 		switch (token_type) {
 		
 		// int int || str str
@@ -176,7 +173,25 @@ public class TreeBuilder {
 			
 		case latteParser.EAPP: {
 			CommonTree func = storage_func.get(children.get(0).token.getText());
+			CommonTree args = (CommonTree)func.getChildren().get(2);
 			// TODO: args type cheking...
+			if (args.token.getType() == latteParser.ARGS) {
+				@SuppressWarnings("unchecked")
+				List<CommonTree> argsList = args.getChildren();
+				if (children.size()-1 != argsList.size()) {
+					throw new TypesMismatchException("No of passed arguments mismatch.");
+				}
+				for (int i = 0; i < argsList.size(); i++) {
+					int givenType = checkTypes(children.get(i+1));
+					int expectedType = argsList.get(i).getChild(0).getType();
+					if (givenType != expectedType) {
+						throw new TypesMismatchException("Expected different type argument.");
+					}
+				}
+			} else if (children.size()-1 != 0) {
+				throw new TypesMismatchException("Zero argument function but args given.");
+			}
+			
 			return checkTypes((CommonTree)func.getChildren().get(0));
 		}
 		

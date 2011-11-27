@@ -1,4 +1,4 @@
-int main() {
+int main(int a, int b) {
     int a = 1, b, c;
     {
         b = c + 1;
@@ -6,6 +6,7 @@ int main() {
         d = b;
     }
     boolean u;
-    u = true;
+    a = main(b,a);
+    a++;
     return 1;
 }
