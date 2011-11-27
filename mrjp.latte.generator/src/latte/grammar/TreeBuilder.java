@@ -117,7 +117,7 @@ public class TreeBuilder {
 		}
 	}
 
-	private void loadFunctions(CommonTree root) {
+	private void loadFunctions(CommonTree root) throws TypesMismatchException {
 		if (root.token == null) {
 			@SuppressWarnings("unchecked")
 			List<CommonTree> children = root.getChildren();
@@ -133,11 +133,14 @@ public class TreeBuilder {
 		}
 	}
 
-	private void addFunction(CommonTree topdef) {
+	private void addFunction(CommonTree topdef) throws TypesMismatchException {
 		@SuppressWarnings("unchecked")
 		List<CommonTree> func = topdef.getChildren();
 		
 		String ident = func.get(1).token.getText();
+		if (lookupFun(ident)) {
+			throw new TypesMismatchException("Function name duplicated");
+		}
 		storage_func.put(ident, topdef);
 	}
 	
@@ -149,6 +152,10 @@ public class TreeBuilder {
 			}
 		}
 		return -1;
+	}
+
+	private boolean lookupFun(String funName) {
+		return storage_func.containsKey(funName);
 	}
 
 	public int checkTypes(CommonTree root) throws TypesMismatchException {
@@ -254,7 +261,12 @@ public class TreeBuilder {
 		}
 			
 		case latteParser.EAPP: {
-			CommonTree func = storage_func.get(children.get(0).token.getText());
+			String funName = children.get(0).token.getText();
+			if (!lookupFun(funName)) {
+				throw new TypesMismatchException("No such function");
+			}
+			
+			CommonTree func = storage_func.get(funName);
 			CommonTree args = (CommonTree)func.getChildren().get(2);
 
 			// args type cheking

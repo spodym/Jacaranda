@@ -2,10 +2,6 @@ int f(int x) {
    return x;
 }
 
-int f(int x) {
-   return x;
-}
-
-int f(int x) {
-   return x;
+int d(int y) {
+   return f(y);
 }
