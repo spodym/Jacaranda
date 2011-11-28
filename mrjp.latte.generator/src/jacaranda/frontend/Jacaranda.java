@@ -36,6 +36,7 @@ public class Jacaranda {
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 		} catch (LatteException e) {
+			e.customLatteErrorPrint();
 			e.printStackTrace();
 		}
 	}

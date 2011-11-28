@@ -79,7 +79,7 @@ public class TreeBuilder {
 			}
 			return isReturn(children.get(children.size()-1), expectedReturn);
 		} else if (expectedReturn != latteParser.TYPE_VOID) {
-			throw new LatteException("Return was expected at the end.");
+			throw new LatteException("No return statement found.", blockLookup);
 		}
 		
 		return false;
@@ -92,13 +92,14 @@ public class TreeBuilder {
 		case latteParser.RET:
 			int givenType = checkTypes((CommonTree)commonTree.getChild(0)); 
 			if (expectedReturn != givenType) {
-				throw new LatteException("Return type mismatch.");
+				throw new LatteException("Return type expected: "+typeToString(expectedReturn)+
+						", but given: "+typeToString(givenType)+".", commonTree);
 			}
 			return true;
 			
 		case latteParser.RETV:
 			if (expectedReturn != latteParser.TYPE_VOID) {
-				throw new LatteException("Return type mismatch 2.");
+				throw new LatteException("Excpected void return.", commonTree);
 			}
 			return true;
 
@@ -150,12 +151,29 @@ public class TreeBuilder {
 
 		default:
 			if (expectedReturn != latteParser.TYPE_VOID) {
-				throw new LatteException("Last stmt is not return stmt.");
+				throw new LatteException("No return statement at the end of function.", commonTree);
 			}
 			break;
 		}
 		
 		return false;
+	}
+
+	private String typeToString(int expectedReturn) {
+		switch (expectedReturn) {
+		case latteParser.TYPE_BOOLEAN:
+			return "boolean";
+		case latteParser.TYPE_INT:
+			return "integer";
+		case latteParser.TYPE_STRING:
+			return "string";
+		case latteParser.TYPE_VOID:
+			return "void";
+
+		default:
+			break;
+		}
+		return "";
 	}
 
 	private boolean isNotReturn(CommonTree commonTree, boolean topLevel) throws LatteException {
@@ -165,7 +183,7 @@ public class TreeBuilder {
 		case latteParser.RET:
 		case latteParser.RETV:
 			if (topLevel) {
-				throw new LatteException("Return earlier than end of block");	
+				throw new LatteException("Unreachable code after return.", commonTree);	
 			} else {
 				return false;
 			}
@@ -195,7 +213,7 @@ public class TreeBuilder {
 				return true;
 			} else {
 				if (topLevel) {
-					throw new LatteException("Return earlier than end of block");	
+					throw new LatteException("Unreachable code after return.", commonTree);	
 				} else {
 					return false;
 				}
@@ -264,7 +282,7 @@ public class TreeBuilder {
 		
 		String ident = func.get(1).token.getText();
 		if (lookupFun(ident)) {
-			throw new LatteException("Function name duplicated");
+			throw new LatteException("Function name duplicated", (CommonTree)func.get(1));
 		}
 		storage_func.put(ident, topdef);
 	}
@@ -301,7 +319,7 @@ public class TreeBuilder {
 			if (type_left != type_right || 
 					(type_left != latteParser.TYPE_INT &&
 					type_left != latteParser.TYPE_STRING)) {
-				throw new LatteException("Add mismatch");
+				throw new LatteException("Arithmetic operation types mismatch", children.get(0));
 			}
 			
 			return type_left;
@@ -317,7 +335,7 @@ public class TreeBuilder {
 
 			if (type_left != type_right ||
 					type_left != latteParser.TYPE_INT) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Arithmetic operation types mismatch", children.get(0));
 			}
 
 			return latteParser.TYPE_INT;
@@ -333,7 +351,7 @@ public class TreeBuilder {
 
 			if (type_left != type_right ||
 					type_left != latteParser.TYPE_INT) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Comparator types mismatch", children.get(0));
 			}
 
 			return latteParser.TYPE_BOOLEAN;
@@ -348,7 +366,7 @@ public class TreeBuilder {
 			if (type_left != type_right ||
 					(type_left != latteParser.TYPE_INT &&
 					type_left != latteParser.TYPE_BOOLEAN)) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Comparator types mismatch", children.get(0));
 			}
 
 			return latteParser.TYPE_BOOLEAN;
@@ -362,7 +380,7 @@ public class TreeBuilder {
 
 			if (type_left != type_right ||
 					type_left != latteParser.TYPE_BOOLEAN) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Boolean operation types mismatch", children.get(0));
 			}
 
 			return type_left;
@@ -372,7 +390,7 @@ public class TreeBuilder {
 			int type_left = checkTypes(children.get(0));
 
 			if (type_left != latteParser.TYPE_INT) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Wrong negation type", children.get(0));
 			}
 			
 			return latteParser.TYPE_INT;
@@ -382,7 +400,7 @@ public class TreeBuilder {
 			int type_left = checkTypes(children.get(0));
 
 			if (type_left != latteParser.TYPE_BOOLEAN) {
-				throw new LatteException("Mismatch");
+				throw new LatteException("Boolean operation type mismatch", children.get(0));
 			}
 			
 			return latteParser.TYPE_BOOLEAN;
@@ -401,14 +419,14 @@ public class TreeBuilder {
 			if (result != -1) {
 				return lookupVar(children.get(0).token.getText());
 			} else {
-				throw new LatteException("unknown variable");
+				throw new LatteException("Unknown variable.", children.get(0));
 			}
 		}
 			
 		case latteParser.EAPP: {
 			String funName = children.get(0).token.getText();
 			if (!lookupFun(funName)) {
-				throw new LatteException("No such function");
+				throw new LatteException("Unknown function identifier.", children.get(0));
 			}
 
 			if (funName.compareTo("printString") == 0) { 
@@ -432,17 +450,19 @@ public class TreeBuilder {
 				@SuppressWarnings("unchecked")
 				List<CommonTree> argsList = args.getChildren();
 				if (children.size()-1 != argsList.size()) {
-					throw new LatteException("No of passed arguments mismatch.");
+					throw new LatteException("No of passed arguments mismatch. Expected: "+argsList.size()+
+							", given: "+(children.size()-1)+".", children.get(0));
 				}
 				for (int i = 0; i < argsList.size(); i++) {
 					int givenType = checkTypes(children.get(i+1));
 					int expectedType = argsList.get(i).getChild(0).getType();
 					if (givenType != expectedType) {
-						throw new LatteException("Expected different type argument.");
+						throw new LatteException("Argument type expected: "+typeToString(expectedType)+
+								", given: "+typeToString(givenType)+".", (CommonTree)argsList.get(i).getChild(0));
 					}
 				}
 			} else if (children.size()-1 != 0) {
-				throw new LatteException("Zero argument function but args given.");
+				throw new LatteException("Passing arguments to zero-arg function.", children.get(0));
 			}
 			
 			return checkTypes((CommonTree)func.getChildren().get(0));
@@ -453,10 +473,11 @@ public class TreeBuilder {
 			if (type != -1) {
 				int currType = checkTypes(children.get(1));
 				if (type != currType) {
-					throw new LatteException("Mismatch in assignment");
+					throw new LatteException("Type mismatch in assignment. Expected: "+typeToString(type)+
+							", given: "+typeToString(currType)+".", children.get(0));
 				}
 			} else {
-				throw new LatteException("unknown variable");
+				throw new LatteException("Unknown variable", children.get(0));
 			}
 			
 			break;
@@ -466,9 +487,10 @@ public class TreeBuilder {
 		case latteParser.INCR: {
 			int type = lookupVar(children.get(0).token.getText());
 			if (type == -1) {
-				throw new LatteException("unknown variable");
+				throw new LatteException("Unknown variable", children.get(0));
 			} else if (type != latteParser.TYPE_INT) {
-				throw new LatteException("wrong type in incr/decr");
+				throw new LatteException("Expected variable of integer type but given: "+
+						typeToString(type)+".", children.get(0));
 			}
 			
 			break;
@@ -505,7 +527,7 @@ public class TreeBuilder {
 					String ident = arg.getChild(1).getText();
 					int type = arg.getChild(0).getType();
 					if (lookupVar(arg.getChild(1).getText()) != -1) {
-						throw new LatteException("funct declr: already exists");
+						throw new LatteException("Duplicated argument name in function", (CommonTree)arg.getChild(1));
 					}
 					storage_vars.peek().put(ident, type);
 				}
@@ -527,14 +549,14 @@ public class TreeBuilder {
 				List<CommonTree> declaration = child.getChildren();
 				String ident = declaration.get(0).token.getText();
 
-//				if (lookupVar(ident) != -1) {
-//					throw new TypesMismatchException("already exists");
-//				}
+				if (storage_vars.peek().containsKey(ident)) {
+					throw new LatteException("Variable already declared", child);
+				}
 				
 				if (child.token.getType() == latteParser.INIT) {
 					int currType = checkTypes(declaration.get(1));
 					if (type != currType) {
-						throw new LatteException("Mismatch");
+						throw new LatteException("Type mismatch in declaration", child);
 					}
 				}
 
@@ -567,38 +589,38 @@ public class TreeBuilder {
 
 	private int checkReadInt(List<CommonTree> children) throws LatteException {
 		if (children.size()-1 != 0) {
-			throw new LatteException("printStr expects zero argument.");
+			throw new LatteException("printStr expects zero argument.", children.get(0));
 		}
 		return latteParser.TYPE_INT;
 	}
 
 	private int checkReadString(List<CommonTree> children) throws LatteException {
 		if (children.size()-1 != 0) {
-			throw new LatteException("printStr expects zero argument.");
+			throw new LatteException("printStr expects zero argument.", children.get(0));
 		}
 		return latteParser.TYPE_STRING;
 	}
 
 	private int checkPrintString(List<CommonTree> children) throws LatteException {
 		if (children.size()-1 != 1) {
-			throw new LatteException("printStr expects one argument.");
+			throw new LatteException("printStr expects one argument.", children.get(0));
 		}
 		int givenType = checkTypes(children.get(1));
 		int expectedType = latteParser.TYPE_STRING;
 		if (givenType != expectedType) {
-			throw new LatteException("Expected `different type argument.");
+			throw new LatteException("Expected `different type argument.", children.get(0));
 		}
 		return latteParser.TYPE_VOID;
 	}
 
 	private int checkPrintInt(List<CommonTree> children) throws LatteException {
 		if (children.size()-1 != 1) {
-			throw new LatteException("printInt expects one argument.");
+			throw new LatteException("printInt expects one argument.", children.get(0));
 		}
 		int givenType = checkTypes(children.get(1));
 		int expectedType = latteParser.TYPE_INT;
 		if (givenType != expectedType) {
-			throw new LatteException("Expected `different type argument.");
+			throw new LatteException("Expected `different type argument.", children.get(0));
 		}
 		return latteParser.TYPE_VOID;
 	}

@@ -112,10 +112,10 @@ decr
     : ident '--'  ';' -> ^(DECR ident)
     ;
 ret
-    : 'return' expr ';' -> ^(RET expr)
+    : lc='return' expr ';' -> ^(RET[$lc,"RETV"] expr)
     ;
 vret
-    : 'return' ';' -> ^(RETV)
+    : lc='return' ';' -> ^(RETV[$lc,"RETV"])
     ;
 cond
     : 'if' '(' expr ')' stmt ('else' stmt)? -> ^(COND expr stmt+)
@@ -143,8 +143,8 @@ type
 atom
     : evar
     | elitint
-    | 'true' -> TRUE
-    | 'false' -> FALSE
+    | lc='true' -> TRUE[$lc,"TRUE"]
+    | lc='false' -> FALSE[$lc,"FALSE"]
     | eapp
     | estring
     | '(' expr ')' -> expr
