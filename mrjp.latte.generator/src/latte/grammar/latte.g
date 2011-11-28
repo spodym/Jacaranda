@@ -100,28 +100,28 @@ noinit
     : ident -> ^(NOINIT ident)
     ;
 init
-    : ident '=' expr -> ^(INIT ident expr)
+    : ident lc='=' expr -> ^(INIT[$lc, "INIT"] ident expr)
     ;
 ass
-    : ident '=' expr  ';' -> ^(ASS ident expr)
+    : ident lc='=' expr  ';' -> ^(ASS[$lc, "ASS"] ident expr)
     ;
 incr
-    : ident '++'  ';' -> ^(INCR ident)
+    : ident lc='++'  ';' -> ^(INCR[$lc, "INCR"] ident)
     ;
 decr
-    : ident '--'  ';' -> ^(DECR ident)
+    : ident lc='--'  ';' -> ^(DECR[$lc, "DECR"] ident)
     ;
 ret
-    : lc='return' expr ';' -> ^(RET[$lc,"RETV"] expr)
+    : lc='return' expr ';' -> ^(RET[$lc,"RET"] expr)
     ;
 vret
     : lc='return' ';' -> ^(RETV[$lc,"RETV"])
     ;
 cond
-    : 'if' '(' expr ')' stmt ('else' stmt)? -> ^(COND expr stmt+)
+    : lc='if' '(' expr ')' stmt ('else' stmt)? -> ^(COND[$lc, "COND"] expr stmt+)
     ;
 swhile
-    : 'while' '(' expr ')' stmt -> ^(SWHILE expr stmt)
+    : lc='while' '(' expr ')' stmt -> ^(SWHILE[$lc, "SWHILE"] expr stmt)
     ;
 sexp
     : expr ';'!

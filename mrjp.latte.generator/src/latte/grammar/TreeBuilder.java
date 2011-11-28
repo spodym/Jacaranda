@@ -124,6 +124,10 @@ public class TreeBuilder {
 					result = isReturn((CommonTree)commonTree.getChild(1), expectedReturn);
 				}
 			}
+			if (!result){
+				throw new LatteException("No return statement found.", commonTree);
+			}
+			
 			return result;
 		}
 
@@ -203,7 +207,7 @@ public class TreeBuilder {
 					result = (lret || rret);
 				}
 			} else {
-				CommonTree expr = (CommonTree)commonTree.getChild(1);
+				CommonTree expr = (CommonTree)commonTree.getChild(0);
 				if (expr.token.getType() == latteParser.TRUE) {
 					result = isNotReturn((CommonTree)commonTree.getChild(1), true);
 				}
@@ -550,7 +554,7 @@ public class TreeBuilder {
 				String ident = declaration.get(0).token.getText();
 
 				if (storage_vars.peek().containsKey(ident)) {
-					throw new LatteException("Variable already declared", child);
+					throw new LatteException("Variable already declared", declaration.get(0));
 				}
 				
 				if (child.token.getType() == latteParser.INIT) {
