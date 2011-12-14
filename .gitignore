@@ -11,6 +11,7 @@ mrjp.latte.generator/.settings/org.eclipse.jdt.core.prefs
 mrjp.latte.generator/antlr-generated/
 
 # output
+Jacaranda.jar
 jacaranda.jar
 jacaranda_jar.xml
 
