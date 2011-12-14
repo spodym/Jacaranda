@@ -14,7 +14,11 @@ CLASSES = \
 
 default: classes
 
-classes: $(CLASSES:.java=.class)
+classes: grammar $(CLASSES:.java=.class)
+
+grammar:
+	cd mrjp.latte.generator/src; java -jar ../antlr-3.4-complete.jar -o ../antlr-generated latte/grammar/latte.g
+	cd mrjp.latte.generator/src; java -jar ../antlr-3.4-complete.jar -o ../antlr-generated latte/grammar/lattetree.g
 
 jar: classes
 	cd classes; jar cfm ../Jacaranda.jar ../manifest.txt .
