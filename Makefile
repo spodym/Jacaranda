@@ -12,9 +12,12 @@ CLASSES = \
 	mrjp.latte.generator/src/latte/grammar/TreeBuilder.java \
 	mrjp.latte.generator/src/jacaranda/frontend/Jacaranda.java
 
-default: classes
+default: jar
 
-classes: grammar $(CLASSES:.java=.class)
+dirs:
+	mkdir -p classes
+
+classes: dirs grammar $(CLASSES:.java=.class)
 
 grammar:
 	cd mrjp.latte.generator/src; java -jar ../antlr-3.4-complete.jar -o ../antlr-generated latte/grammar/latte.g
