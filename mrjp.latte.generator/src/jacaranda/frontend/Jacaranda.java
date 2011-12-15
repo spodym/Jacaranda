@@ -9,11 +9,9 @@ import java.nio.charset.Charset;
 
 import latte.grammar.TreeBuilder;
 import latte.grammar.LatteException;
-//import latte.grammar.lattetree;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
-//import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 public class Jacaranda {
 
@@ -24,12 +22,8 @@ public class Jacaranda {
 		String file_data;
 		try {
 			file_data = readFile(file_path);
-//			System.err.println(file_data);
-			
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
-
-//			System.err.println(tree.toStringTree());
 			builder.checkType(tree);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,7 +31,6 @@ public class Jacaranda {
 			e.printStackTrace();
 		} catch (LatteException e) {
 			e.customLatteErrorPrint();
-//			e.printStackTrace();
 		}
 	}
 	
