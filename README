@@ -1,3 +1,28 @@
 Jacaranda - Latte compiler
-http://www.mimuw.edu.pl/~ben/Zajecia/Mrj2011/Latte/
-http://en.wikipedia.org/wiki/Jacaranda
+
+Project for Compiler Construction class at University of Warsaw.
+
+I. First iteration of project:
+1. Building tree:
+    AST (Abstract syntax tree) for Latte program is build using ANTLRv3.
+    Latte grammar is defined in: mrjp.latte.generator/src/latte/grammar/latte.g
+
+2. Syntax & semantics analyss:
+    Syntax analyss is performed by ANTLR during AST loading.
+    Semantics analyss is placed in function:
+        void checkType(CommonTree root)
+    Placed in TreeBuilder.java
+    It performs function types checking, types checking & return statements
+    checking.
+
+II. Second iteration of project: SOON
+III. Third iteration of project: SOON
+
+How to run?
+$ make
+$ java -jar Jacaranda.jar path_to_latte_file.lat
+$ # here we get eventuall errors if analyss went wrong
+$ # othervise output is clean
+
+http://www.mimuw.edu.pl/~ben/Zajecia/Mrj2011/Latte/ - project site
+http://en.wikipedia.org/wiki/Jacaranda - random name for project
