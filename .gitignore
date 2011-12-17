@@ -15,11 +15,10 @@ Jacaranda.jar
 jacaranda.jar
 jacaranda_jar.xml
 
-# tutorial
+# tutorial & testing
 ANTLRTutorial/
-
-# testing
 latte_tests/my_tests/
+jasmintest/
 
 # generic files to ignore
 *~
