@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -73,7 +74,7 @@ public class JVMCompiler {
 	}
 
 	private int JVMtraverse(CommonTree tree) throws IOException {
-		int token_type = -1;
+ 		int token_type = -1;
 		if (tree.token != null) {
 			token_type = tree.token.getType();
 		}
@@ -109,8 +110,21 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.BLOCK: {
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					JVMtraverse(child);
+				}
+			}
 			break;
 		}
+		case latteParser.DECL: {
+			break;
+		}
+		case latteParser.EAPP:
+		case latteParser.ASS:
+		case latteParser.DECR:
+		case latteParser.INCR:
 		case latteParser.OP_PLUS:
 		case latteParser.OP_MINUS:
 		case latteParser.OP_TIMES:
@@ -131,11 +145,6 @@ public class JVMCompiler {
 		case latteParser.TRUE:
 		case latteParser.STRING:
 		case latteParser.VAR_IDENT:
-		case latteParser.EAPP:
-		case latteParser.ASS:
-		case latteParser.DECR:
-		case latteParser.INCR:
-		case latteParser.DECL:
 		default:
 		}
 
