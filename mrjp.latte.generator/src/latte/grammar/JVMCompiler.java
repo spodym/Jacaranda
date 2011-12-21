@@ -58,19 +58,6 @@ public class JVMCompiler {
 		JVMwrite(".end method");
 		
 		JVMtraverse(troot);
-		
-//		.method public static main([Ljava/lang/String;)V 
-//		    .limit stack 5 
-//		    .limit locals 100
-//		    iconst_0
-//		    istore_0
-//		    iinc	0 1
-//		    iload_0
-//		    getstatic java/lang/System/out Ljava/io/PrintStream;
-//		    swap
-//		    invokevirtual java/io/PrintStream/println(I)V
-//		    return
-//		.end method
 	}
 
 	private int JVMtraverse(CommonTree tree) throws IOException {
@@ -119,12 +106,33 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.DECL: {
+
+		    JVMwrite("iconst_0", 1);
+			JVMwrite("istore_0", 1);
 			break;
 		}
-		case latteParser.EAPP:
+		case latteParser.EAPP: {
+//		    iload_0
+//		    getstatic java/lang/System/out Ljava/io/PrintStream;
+//		    swap
+//		    invokevirtual java/io/PrintStream/println(I)V
+			break;
+		}
 		case latteParser.ASS:
 		case latteParser.DECR:
-		case latteParser.INCR:
+		case latteParser.INCR: {		
+//		    iinc	0 1
+			break;
+		}
+		case latteParser.RET: {
+//		    return
+			break;
+		}
+		case latteParser.RETV: {
+//		    iload_0
+//		    return
+			break;
+		}
 		case latteParser.OP_PLUS:
 		case latteParser.OP_MINUS:
 		case latteParser.OP_TIMES:
