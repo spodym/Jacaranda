@@ -31,7 +31,7 @@ public class JVMCompiler {
 		if(!fout.exists()){
 			fout.createNewFile();
 		}
-		this.fwriter = new FileWriter(name+".j");
+		this.fwriter = new FileWriter(className+".j");
 		this.output = new BufferedWriter(fwriter);
 	}
 
@@ -48,6 +48,10 @@ public class JVMCompiler {
 		JVMwrite(out, 0);
 	}
 
+	private void JVMwriteEnd() throws IOException {
+		output.close();
+	}
+
 	public void JVMgenerate() throws IOException {
 		JVMwrite(".class public " + className);
 		JVMwrite(".super java/lang/Object");
@@ -56,8 +60,16 @@ public class JVMCompiler {
 		JVMwrite("invokespecial java/lang/Object/<init>()V", 1);
 		JVMwrite("return", 1);
 		JVMwrite(".end method");
+
+		JVMwrite(".method public static main([Ljava/lang/String;)V");
+		JVMwrite("invokestatic "+className+".main()I", 1);
+		JVMwrite("pop", 1);
+		JVMwrite("return", 1);
+		JVMwrite(".end method");
 		
 		JVMtraverse(troot);
+		
+		JVMwriteEnd();
 	}
 
 	private int JVMtraverse(CommonTree tree) throws IOException {
@@ -74,7 +86,7 @@ public class JVMCompiler {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
 			if (name.compareTo("main") == 0) {
-				JVMwrite(".method public static main([Ljava/lang/String;)I");	
+				JVMwrite(".method public static main()I");	
 			} else {
 				if (args.getType() == latteParser.ARGS) {
 					String arguments = "";
@@ -106,31 +118,30 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.DECL: {
-
 		    JVMwrite("iconst_0", 1);
 			JVMwrite("istore_0", 1);
 			break;
 		}
 		case latteParser.EAPP: {
-//		    iload_0
-//		    getstatic java/lang/System/out Ljava/io/PrintStream;
-//		    swap
-//		    invokevirtual java/io/PrintStream/println(I)V
+			JVMwrite("iload_0", 1);
+			JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+			JVMwrite("swap", 1);
+			JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);
 			break;
 		}
 		case latteParser.ASS:
 		case latteParser.DECR:
 		case latteParser.INCR: {		
-//		    iinc	0 1
+		    JVMwrite("iinc 0 1", 1);
 			break;
 		}
 		case latteParser.RET: {
-//		    return
+		    JVMwrite("iload_0", 1);
+		    JVMwrite("ireturn", 1);
 			break;
 		}
 		case latteParser.RETV: {
-//		    iload_0
-//		    return
+		    JVMwrite("return", 1);
 			break;
 		}
 		case latteParser.OP_PLUS:
