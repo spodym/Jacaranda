@@ -2,6 +2,14 @@ int main() {
     int i = 0;
     i++;
     i++;
+    {
+        int a = 90;
+        printInt(a);
+    }
+    {
+        int a = 888888880;
+        printInt(a);
+    }
 	printInt(i);
 	printInt(0);
     return i;

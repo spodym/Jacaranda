@@ -109,17 +109,30 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.BLOCK: {
+			storage_vars.push(new HashMap<String, Integer>());
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
 					CommonTree child = i.next();
 					JVMtraverse(child);
 				}
 			}
+			storage_vars.pop();
 			break;
 		}
 		case latteParser.DECL: {
-		    JVMwrite("iconst_0", 1);
-			JVMwrite("istore_0", 1);
+			int freeId = JVMFreeVarId(storage_vars);
+			int varType = children.get(0).token.getType();
+			for(int i = 1; i < children.size(); i++) {
+				CommonTree child = children.get(i);
+				@SuppressWarnings("unchecked")
+				List<CommonTree> declaration = child.getChildren();
+				String ident = declaration.get(0).token.getText();
+
+				int freeIdShift = freeId + i - 1;
+				storage_vars.peek().put(ident, freeIdShift);
+			    JVMwrite("ldc 0", 1);
+				JVMwrite("istore_"+freeIdShift, 1);
+			}
 			break;
 		}
 		case latteParser.EAPP: {
@@ -163,7 +176,9 @@ public class JVMCompiler {
 		case latteParser.NEGATION:
 		case latteParser.NOT:
 		case latteParser.VAR_IDENT: {
-			JVMwrite("iload_0", 1);
+			String idName = children.get(0).getText();
+			int idNo = JVMVarToId(idName);
+			JVMwrite("iload_" + idNo, 1);
 			break;
 		}
 		case latteParser.INTEGER: {
@@ -177,6 +192,25 @@ public class JVMCompiler {
 		}
 
 		return token_type;
+	}
+
+	private int JVMVarToId(String idName) {
+		for(int i = storage_vars.size()-1; i >= 0; i--) {
+			HashMap<String,Integer> locVar = storage_vars.get(i);
+			if (locVar.containsKey(idName)) {
+				return locVar.get(idName);
+			}
+		}
+		return -1;
+	}
+
+	private int JVMFreeVarId(Stack<HashMap<String, Integer>> vars) {
+		int freeId = 0;
+		for (Iterator<HashMap<String, Integer>> iterator = vars.iterator(); iterator.hasNext();) {
+			HashMap<String, Integer> hashMap = (HashMap<String, Integer>) iterator.next();
+			freeId += hashMap.size();
+		}
+		return freeId;
 	}
 		
 }
