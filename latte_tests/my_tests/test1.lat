@@ -1,16 +1,23 @@
 int main() {
-    int i = 0;
+    int i;
     i++;
     i++;
     {
-        int a = 90;
+        int a = foo();
         printInt(a);
     }
     {
-        int a = 888888880;
+        int a;
         printInt(a);
     }
 	printInt(i);
 	printInt(0);
     return i;
+}
+
+int foo() {
+    int a, b, c;
+    int d = 109;
+    int e, f, g;
+    return d;
 }

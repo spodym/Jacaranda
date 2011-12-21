@@ -13,7 +13,7 @@ import java.util.Stack;
 
 public class JVMCompiler {
 
-	private HashMap<String, CommonTree> storage_func = new HashMap<String, CommonTree>();
+	private HashMap<String, String> storage_func = new HashMap<String, String>();
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
 	private String className;
 	private CommonTree troot;
@@ -53,6 +53,8 @@ public class JVMCompiler {
 	}
 
 	public void JVMgenerate() throws IOException {
+		JVMLoadFunctions();
+
 		JVMwrite(".class public " + className);
 		JVMwrite(".super java/lang/Object");
 		JVMwrite(".method public <init>()V");
@@ -72,6 +74,64 @@ public class JVMCompiler {
 		JVMwriteEnd();
 	}
 
+	private void JVMLoadFunctions() {
+		if (troot.token == null) {
+			@SuppressWarnings("unchecked")
+			List<CommonTree> children = troot.getChildren();
+
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					JVMAddFunction(child);
+				}
+			}			
+		} else {
+			JVMAddFunction(troot);
+		}
+	}
+
+
+	private void JVMAddFunction(CommonTree topdef) {
+		@SuppressWarnings("unchecked")
+		List<CommonTree> func = topdef.getChildren();
+		
+		String ident = func.get(1).token.getText();
+		String out = JVMEncodeType(func.get(0).token.getType());
+		String args = "";
+		if (func.get(2).getType() == latteParser.ARGS) {
+			@SuppressWarnings("unchecked")
+			List<CommonTree> argsList = func.get(2).getChildren();
+			for (Iterator<CommonTree> iterator = argsList.iterator(); iterator.hasNext();) {
+				CommonTree commonTree = (CommonTree) iterator.next();
+				int type = commonTree.getChild(0).getType();
+				args = args.concat(JVMEncodeType(type));
+			}
+		}
+
+		String jvmname = ident + "(" + args + ")" + out;
+		storage_func.put(ident, jvmname);
+	}
+
+	private String JVMEncodeType(int type) {
+		String out = "";
+		switch (type) {
+		case latteParser.TYPE_INT:
+			out = "I";
+			break;
+		case latteParser.TYPE_STRING:
+			out = "I"; // TODO
+			break;
+		case latteParser.TYPE_BOOLEAN:
+			out = "I";
+			break;
+		case latteParser.TYPE_VOID:
+			out = "V";
+			break;
+		default:
+		}
+		return out;
+	}
+
 	private int JVMtraverse(CommonTree tree) throws IOException {
  		int token_type = -1;
 		if (tree.token != null) {
@@ -85,16 +145,7 @@ public class JVMCompiler {
 		case latteParser.TOP_DEF: {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
-			if (name.compareTo("main") == 0) {
-				JVMwrite(".method public static main()I");	
-			} else {
-				if (args.getType() == latteParser.ARGS) {
-					String arguments = "";
-					JVMwrite(".method public static "+name+"("+arguments+")V");
-				} else {
-					JVMwrite(".method public static "+name+"()V");
-				}
-			}
+			JVMwrite(".method public static " + storage_func.get(name));
 		    JVMwrite(".limit stack 5", 1);
 		    JVMwrite(".limit locals 100", 1);
 		    
@@ -130,8 +181,15 @@ public class JVMCompiler {
 
 				int freeIdShift = freeId + i - 1;
 				storage_vars.peek().put(ident, freeIdShift);
-			    JVMwrite("ldc 0", 1);
-				JVMwrite("istore_"+freeIdShift, 1);
+				
+				if (varType == latteParser.TYPE_INT) {
+					if (declaration.size() == 2) {
+					    JVMtraverse(declaration.get(1));
+					} else {
+					    JVMwrite("ldc 0", 1);	
+					}
+					JVMwrite("istore " + freeIdShift, 1);
+				}
 			}
 			break;
 		}
@@ -142,6 +200,7 @@ public class JVMCompiler {
 				JVMtraverse(children.get(1));
 				JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);	
 			} else {
+				JVMwrite("invokestatic "+className+"."+storage_func.get(functionName), 1);
 			}
 			break;
 		}
@@ -152,7 +211,7 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.RET: {
-		    JVMwrite("iload_0", 1);
+			JVMtraverse(children.get(0));
 		    JVMwrite("ireturn", 1);
 			break;
 		}
@@ -188,7 +247,16 @@ public class JVMCompiler {
 		case latteParser.FALSE:
 		case latteParser.TRUE:
 		case latteParser.STRING:
-		default:
+		default: {
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					JVMtraverse(child);
+				}
+			}
+			break;
+		}
+		
 		}
 
 		return token_type;
