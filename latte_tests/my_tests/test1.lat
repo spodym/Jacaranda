@@ -3,7 +3,7 @@ int main() {
     i++;
     i++;
     {
-        int a = foo();
+        int a = foo(i, 42);
         printInt(a);
     }
     {
@@ -15,9 +15,9 @@ int main() {
     return i;
 }
 
-int foo() {
+int foo(int d, int x) {
     int a, b, c;
-    int d = 109;
+    d = 109;
     int e, f, g;
-    return d;
+    return x;
 }

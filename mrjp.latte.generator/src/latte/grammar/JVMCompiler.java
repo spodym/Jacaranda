@@ -151,7 +151,17 @@ public class JVMCompiler {
 		    
 		    // Traversing function body.
 			if (args.getType() == latteParser.ARGS) {
+				storage_vars.push(new HashMap<String, Integer>());
+				@SuppressWarnings("unchecked")
+				List<CommonTree> argsList = args.getChildren();
+				int freeId = JVMFreeVarId(storage_vars);
+				for (int i = 0; i < argsList.size(); i++) {
+					String ident = argsList.get(i).getChild(1).getText();
+					int freeIdShift = freeId + i;
+					storage_vars.peek().put(ident, freeIdShift);
+				}
 				JVMtraverse(children.get(3));
+				storage_vars.pop();
 			} else {
 				JVMtraverse(children.get(2));
 			}
@@ -200,6 +210,9 @@ public class JVMCompiler {
 				JVMtraverse(children.get(1));
 				JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);	
 			} else {
+				for (int i = 1; i < children.size(); i++) {
+					JVMtraverse(children.get(i));
+				}
 				JVMwrite("invokestatic "+className+"."+storage_func.get(functionName), 1);
 			}
 			break;
@@ -237,7 +250,7 @@ public class JVMCompiler {
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = JVMVarToId(idName);
-			JVMwrite("iload_" + idNo, 1);
+			JVMwrite("iload " + idNo, 1);
 			break;
 		}
 		case latteParser.INTEGER: {
