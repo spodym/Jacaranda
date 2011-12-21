@@ -33,19 +33,27 @@ public class JVMCompiler {
 		this.fwriter = new FileWriter(name+".j");
 		this.output = new BufferedWriter(fwriter);
 	}
-	
-	private void JVMwrite(String out) throws IOException {
+
+	private void JVMwrite(String out, int indentionLevel) throws IOException {
 		System.out.println(out);
-		output.write(out + "\r\n");
+		String indention = "";
+		for (int i = 0; i < indentionLevel; i++) {
+			indention = indention.concat("    ");
+		}
+		output.write(indention + out + "\r\n");
+	}
+
+	private void JVMwrite(String out) throws IOException {
+		JVMwrite(out, 0);
 	}
 
 	public void JVMgenerate() throws IOException {
 		JVMwrite(".class public " + className);
 		JVMwrite(".super java/lang/Object");
 		JVMwrite(".method public <init>()V");
-		JVMwrite("	aload_0");
-		JVMwrite("	invokespecial java/lang/Object/<init>()V");
-		JVMwrite("	return");
+		JVMwrite("aload_0", 1);
+		JVMwrite("invokespecial java/lang/Object/<init>()V", 1);
+		JVMwrite("return", 1);
 		JVMwrite(".end method");
 		
 		JVMtraverse(troot);
@@ -64,7 +72,7 @@ public class JVMCompiler {
 //		.end method
 	}
 
-	private int JVMtraverse(CommonTree tree) {
+	private int JVMtraverse(CommonTree tree) throws IOException {
 		int token_type = -1;
 		if (tree.token != null) {
 			token_type = tree.token.getType();
@@ -75,6 +83,32 @@ public class JVMCompiler {
 		switch (token_type) {
 
 		case latteParser.TOP_DEF: {
+			String name = children.get(1).getText();
+			CommonTree args = children.get(2);
+			if (name.compareTo("main") == 0) {
+				JVMwrite(".method public static main([Ljava/lang/String;)I");	
+			} else {
+				if (args.getType() == latteParser.ARGS) {
+					String arguments = "";
+					JVMwrite(".method public static "+name+"("+arguments+")V");
+				} else {
+					JVMwrite(".method public static "+name+"()V");
+				}
+			}
+		    JVMwrite(".limit stack 5", 1);
+		    JVMwrite(".limit locals 100", 1);
+		    
+		    // Traversing function body.
+			if (args.getType() == latteParser.ARGS) {
+				JVMtraverse(children.get(3));
+			} else {
+				JVMtraverse(children.get(2));
+			}
+		    
+			JVMwrite(".end method");
+			break;
+		}
+		case latteParser.BLOCK: {
 			break;
 		}
 		case latteParser.OP_PLUS:
@@ -101,7 +135,6 @@ public class JVMCompiler {
 		case latteParser.ASS:
 		case latteParser.DECR:
 		case latteParser.INCR:
-		case latteParser.BLOCK:
 		case latteParser.DECL:
 		default:
 		}
