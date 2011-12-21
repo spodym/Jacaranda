@@ -14,6 +14,7 @@ mrjp.latte.generator/antlr-generated/
 Jacaranda.jar
 jacaranda.jar
 jacaranda_jar.xml
+*.j
 
 # tutorial & testing
 ANTLRTutorial/
