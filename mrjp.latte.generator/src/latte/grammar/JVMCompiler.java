@@ -123,10 +123,13 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.EAPP: {
-			JVMwrite("iload_0", 1);
-			JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
-			JVMwrite("swap", 1);
-			JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);
+			String functionName = children.get(0).getText();
+			if (functionName.compareTo("printInt") == 0) {
+				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+				JVMtraverse(children.get(1));
+				JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);	
+			} else {
+			}
 			break;
 		}
 		case latteParser.ASS:
@@ -159,11 +162,17 @@ public class JVMCompiler {
 		case latteParser.OP_OR:
 		case latteParser.NEGATION:
 		case latteParser.NOT:
-		case latteParser.INTEGER:
+		case latteParser.VAR_IDENT: {
+			JVMwrite("iload_0", 1);
+			break;
+		}
+		case latteParser.INTEGER: {
+			JVMwrite("ldc " + tree.getText(), 1);
+			break;
+		}
 		case latteParser.FALSE:
 		case latteParser.TRUE:
 		case latteParser.STRING:
-		case latteParser.VAR_IDENT:
 		default:
 		}
 

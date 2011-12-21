@@ -3,5 +3,6 @@ int main() {
     i++;
     i++;
 	printInt(i);
+	printInt(0);
     return i;
 }
