@@ -7,6 +7,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import latte.grammar.JVMCompiler;
 import latte.grammar.TreeBuilder;
 import latte.grammar.LatteException;
 
@@ -25,6 +26,8 @@ public class Jacaranda {
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 			builder.checkType(tree);
+			JVMCompiler jvm = new JVMCompiler("out", tree);
+			jvm.JVMgenerate();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RecognitionException e) {
