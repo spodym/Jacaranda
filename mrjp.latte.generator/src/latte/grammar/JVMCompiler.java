@@ -15,6 +15,7 @@ public class JVMCompiler {
 
 	private HashMap<String, String> storage_func = new HashMap<String, String>();
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
+	private int labelCounter;
 	private String className;
 	private CommonTree troot;
 	FileWriter fwriter;
@@ -132,6 +133,11 @@ public class JVMCompiler {
 		return out;
 	}
 
+	private String JVMNextLabel() {
+		labelCounter++;
+		return "Label"+labelCounter;
+	}
+
 	private int JVMtraverse(CommonTree tree) throws IOException {
  		int token_type = -1;
 		if (tree.token != null) {
@@ -217,6 +223,27 @@ public class JVMCompiler {
 			}
 			break;
 		}
+		case latteParser.COND: {
+			if (children.size() == 3) {
+				String elseLabel = JVMNextLabel();
+				String endifLabel = JVMNextLabel();
+				JVMtraverse(children.get(0));
+				JVMwrite("ifeq " + elseLabel, 1);
+				JVMtraverse(children.get(1));
+				JVMwrite("goto " + endifLabel, 1);
+				JVMwrite(elseLabel+":");
+				JVMtraverse(children.get(2));
+				JVMwrite(endifLabel+":");
+			} else {
+				String endifLabel = JVMNextLabel();
+				JVMtraverse(children.get(0));
+				JVMwrite("ifeq " + endifLabel, 1);
+				JVMtraverse(children.get(1));
+				JVMwrite(endifLabel+":");
+			}
+			break;
+		}
+		case latteParser.SWHILE:
 		case latteParser.ASS:
 		case latteParser.DECR:
 		case latteParser.INCR: {		
