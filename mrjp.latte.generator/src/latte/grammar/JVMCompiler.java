@@ -305,7 +305,11 @@ public class JVMCompiler {
 		case latteParser.OP_NE:
 		case latteParser.OP_AND:
 		case latteParser.OP_OR:
-		case latteParser.NEGATION:
+		case latteParser.NEGATION: {
+			JVMtraverse(children.get(0));
+		    JVMwrite("ineg", 1);
+		    break;
+		}
 		case latteParser.NOT:
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
