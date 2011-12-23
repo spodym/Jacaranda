@@ -294,8 +294,18 @@ public class JVMCompiler {
 		    JVMwrite("isub", 1);
 		    break;
 		}
-		case latteParser.OP_TIMES:
-		case latteParser.OP_DIV:
+		case latteParser.OP_TIMES: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("imul", 1);
+		    break;
+		}
+		case latteParser.OP_DIV: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("idiv", 1);
+		    break;
+		}
 		case latteParser.OP_MOD:
 		case latteParser.OP_LTH:
 		case latteParser.OP_LE:
