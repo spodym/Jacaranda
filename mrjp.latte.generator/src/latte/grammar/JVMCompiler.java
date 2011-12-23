@@ -243,11 +243,28 @@ public class JVMCompiler {
 			}
 			break;
 		}
-		case latteParser.SWHILE:
+		case latteParser.SWHILE: {
+			String whilebodyLabel = JVMNextLabel();
+			String endwhileLabel = JVMNextLabel();
+			JVMwrite(whilebodyLabel+":");
+			JVMtraverse(children.get(0));
+			JVMwrite("ifeq " + endwhileLabel, 1);
+			JVMtraverse(children.get(1));
+			JVMwrite("goto " + whilebodyLabel, 1);
+			JVMwrite(endwhileLabel+":");
+			break;
+		}
 		case latteParser.ASS:
-		case latteParser.DECR:
-		case latteParser.INCR: {		
-		    JVMwrite("iinc 0 1", 1);
+		case latteParser.DECR: {
+			String idName = children.get(0).getText();
+			int idNo = JVMVarToId(idName);
+		    JVMwrite("iinc " + idNo + " -1", 1);
+			break;
+		}
+		case latteParser.INCR: {
+			String idName = children.get(0).getText();
+			int idNo = JVMVarToId(idName);
+		    JVMwrite("iinc " + idNo + " 1", 1);
 			break;
 		}
 		case latteParser.RET: {
