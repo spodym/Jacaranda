@@ -2,18 +2,18 @@ int main() {
     int i;
     i++;
     i++;
-    {
+    /*{
         int a = foo(i, 42);
         if (1) {
             printInt(a);
         } else {
             printInt(29);
         }
-    }
+    }*/
     {
         int a = 10;
         while (a) {
-            a--;
+            a = a - 1;
             printInt(a);
         }
     }

@@ -254,7 +254,13 @@ public class JVMCompiler {
 			JVMwrite(endwhileLabel+":");
 			break;
 		}
-		case latteParser.ASS:
+		case latteParser.ASS: {
+			JVMtraverse(children.get(1));
+			String idName = children.get(0).getText();
+			int idNo = JVMVarToId(idName);
+			JVMwrite("istore " + idNo, 1);
+			break;
+		}
 		case latteParser.DECR: {
 			String idName = children.get(0).getText();
 			int idNo = JVMVarToId(idName);
@@ -276,8 +282,18 @@ public class JVMCompiler {
 		    JVMwrite("return", 1);
 			break;
 		}
-		case latteParser.OP_PLUS:
-		case latteParser.OP_MINUS:
+		case latteParser.OP_PLUS: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("iadd", 1);
+		    break;
+		}
+		case latteParser.OP_MINUS: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("isub", 1);
+		    break;
+		}
 		case latteParser.OP_TIMES:
 		case latteParser.OP_DIV:
 		case latteParser.OP_MOD:
