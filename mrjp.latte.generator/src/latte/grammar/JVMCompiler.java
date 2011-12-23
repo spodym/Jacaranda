@@ -306,15 +306,27 @@ public class JVMCompiler {
 		    JVMwrite("idiv", 1);
 		    break;
 		}
-		case latteParser.OP_MOD:
+		case latteParser.OP_MOD: {
+			break;
+		}
 		case latteParser.OP_LTH:
 		case latteParser.OP_LE:
 		case latteParser.OP_GTH:
 		case latteParser.OP_GE:
 		case latteParser.OP_EQU:
 		case latteParser.OP_NE:
-		case latteParser.OP_AND:
-		case latteParser.OP_OR:
+		case latteParser.OP_AND: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("iand", 1);
+			break;
+		}
+		case latteParser.OP_OR: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("ior", 1);
+			break;
+		}
 		case latteParser.NEGATION: {
 			JVMtraverse(children.get(0));
 		    JVMwrite("ineg", 1);
@@ -331,9 +343,17 @@ public class JVMCompiler {
 			JVMwrite("ldc " + tree.getText(), 1);
 			break;
 		}
-		case latteParser.FALSE:
-		case latteParser.TRUE:
-		case latteParser.STRING:
+		case latteParser.FALSE: {
+			JVMwrite("ldc 0", 1);
+			break;
+		}
+		case latteParser.TRUE: {
+			JVMwrite("ldc 1", 1);
+			break;
+		}
+		case latteParser.STRING: {
+			break;
+		}
 		default: {
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {

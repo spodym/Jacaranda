@@ -1,6 +1,15 @@
 int main() {
     int i;
 
+    /*if (true && true) { printInt(1); };
+    if (true && false) { printInt(2); };
+    if (false && true) { printInt(3); };
+    if (false && false) { printInt(4); };
+    if (true || true) { printInt(5); };
+    if (true || false) { printInt(6); };
+    if (false || true) { printInt(7); };
+    if (false || false) { printInt(8); };*/
+
     /*printInt(4/2);
     printInt(1/2);
     printInt(1/3);
@@ -32,9 +41,11 @@ int main() {
     return i;
 }
 
+/*
 int foo(int d, int x) {
     int a, b, c;
     d = 109;
     int e, f, g;
     return x;
 }
+*/
