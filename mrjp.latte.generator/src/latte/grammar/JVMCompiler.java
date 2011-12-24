@@ -197,14 +197,20 @@ public class JVMCompiler {
 
 				int freeIdShift = freeId + i - 1;
 				storage_vars.peek().put(ident, freeIdShift);
-				
-				if (varType == latteParser.TYPE_INT) {
+
+				switch (varType) {
+				case latteParser.TYPE_INT:
+				case latteParser.TYPE_BOOLEAN: {
 					if (declaration.size() == 2) {
 					    JVMtraverse(declaration.get(1));
 					} else {
 					    JVMwrite("ldc 0", 1);	
 					}
 					JVMwrite("istore " + freeIdShift, 1);
+					break;
+				}
+				default:
+					break;
 				}
 			}
 			break;
@@ -306,9 +312,7 @@ public class JVMCompiler {
 		    JVMwrite("idiv", 1);
 		    break;
 		}
-		case latteParser.OP_MOD: {
-			break;
-		}
+		case latteParser.OP_MOD:
 		case latteParser.OP_LTH:
 		case latteParser.OP_LE:
 		case latteParser.OP_GTH:
@@ -358,7 +362,18 @@ public class JVMCompiler {
 		    JVMwrite("ineg", 1);
 		    break;
 		}
-		case latteParser.NOT:
+		case latteParser.NOT: {
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMtraverse(children.get(0));
+			JVMwrite("ifne " + elseLabel, 1);
+			JVMwrite("iconst_1");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_0");
+			JVMwrite(endifLabel+":");
+			break;
+		}
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = JVMVarToId(idName);
