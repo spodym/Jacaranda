@@ -1,4 +1,4 @@
-JFLAGS = -g -classpath mrjp.latte.generator/antlr-3.4-complete.jar:mrjp.latte.generator/src:mrjp.latte.generator/antlr-generated -d classes
+JFLAGS = -g -classpath mrjp.latte.generator/jasmin.jar:mrjp.latte.generator/antlr-3.4-complete.jar:mrjp.latte.generator/src:mrjp.latte.generator/antlr-generated -d classes
 JC = javac
 .SUFFIXES: .java .class
 .java.class:
@@ -10,6 +10,7 @@ CLASSES = \
 	mrjp.latte.generator/antlr-generated/latte/grammar/lattetree.java \
 	mrjp.latte.generator/src/latte/grammar/LatteException.java \
 	mrjp.latte.generator/src/latte/grammar/TreeBuilder.java \
+	mrjp.latte.generator/src/latte/grammar/JVMCompiler.java \
 	mrjp.latte.generator/src/jacaranda/frontend/Jacaranda.java
 
 default: jar
@@ -26,6 +27,7 @@ grammar:
 jar: classes
 	cd classes; jar cfm ../Jacaranda.jar ../manifest.txt .
 	jar -i Jacaranda.jar mrjp.latte.generator/antlr-3.4-complete.jar
+	jar -i Jacaranda.jar mrjp.latte.generator/jasmin.jar
 
 clean:
 	rm -rf \

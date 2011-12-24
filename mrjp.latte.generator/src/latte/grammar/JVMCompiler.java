@@ -39,7 +39,6 @@ public class JVMCompiler {
 	}
 
 	private void JVMwrite(String out, int indentionLevel) throws IOException {
-		System.out.println(out);
 		String indention = "";
 		for (int i = 0; i < indentionLevel; i++) {
 			indention = indention.concat("    ");
@@ -75,6 +74,9 @@ public class JVMCompiler {
 		JVMtraverse(troot);
 		
 		JVMwriteEnd();
+
+		String[] args = { fout.getPath() };
+		jasmin.Main.main(args);
 	}
 
 	private void JVMLoadFunctions() {
