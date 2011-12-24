@@ -313,7 +313,20 @@ public class JVMCompiler {
 		case latteParser.OP_LE:
 		case latteParser.OP_GTH:
 		case latteParser.OP_GE:
-		case latteParser.OP_EQU:
+		case latteParser.OP_EQU: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMtraverse(children.get(0));
+			JVMwrite("if_icmpne " + elseLabel, 1);
+			JVMwrite("iconst_1");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_0");
+			JVMwrite(endifLabel+":");
+			break;
+		}
 		case latteParser.OP_NE:
 		case latteParser.OP_AND: {
 			JVMtraverse(children.get(0));

@@ -1,5 +1,6 @@
 int main() {
-    int i;
+    int i = 2, j = 2;
+    if (i == j) { printInt(2012); };
 
     /*if (true && true) { printInt(1); };
     if (true && false) { printInt(2); };
