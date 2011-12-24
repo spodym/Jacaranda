@@ -15,6 +15,7 @@ public class JVMCompiler {
 
 	private HashMap<String, String> storage_func = new HashMap<String, String>();
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
+	private Stack<HashMap<String, String>> storage_var_types = new Stack<HashMap<String,String>>();
 	private int labelCounter;
 	private String className;
 	private CommonTree troot;
@@ -120,7 +121,7 @@ public class JVMCompiler {
 			out = "I";
 			break;
 		case latteParser.TYPE_STRING:
-			out = "I"; // TODO
+			out = "Ljava/lang/String;";
 			break;
 		case latteParser.TYPE_BOOLEAN:
 			out = "I";
@@ -158,16 +159,20 @@ public class JVMCompiler {
 		    // Traversing function body.
 			if (args.getType() == latteParser.ARGS) {
 				storage_vars.push(new HashMap<String, Integer>());
+				storage_var_types.push(new HashMap<String, String>());
 				@SuppressWarnings("unchecked")
 				List<CommonTree> argsList = args.getChildren();
 				int freeId = JVMFreeVarId(storage_vars);
 				for (int i = 0; i < argsList.size(); i++) {
+					int type = argsList.get(i).getChild(0).getType();
 					String ident = argsList.get(i).getChild(1).getText();
 					int freeIdShift = freeId + i;
 					storage_vars.peek().put(ident, freeIdShift);
+					storage_var_types.peek().put(ident, JVMTypeForVar(type));
 				}
 				JVMtraverse(children.get(3));
 				storage_vars.pop();
+				storage_var_types.pop();
 			} else {
 				JVMtraverse(children.get(2));
 			}
@@ -177,6 +182,7 @@ public class JVMCompiler {
 		}
 		case latteParser.BLOCK: {
 			storage_vars.push(new HashMap<String, Integer>());
+			storage_var_types.push(new HashMap<String, String>());
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
 					CommonTree child = i.next();
@@ -184,6 +190,7 @@ public class JVMCompiler {
 				}
 			}
 			storage_vars.pop();
+			storage_var_types.pop();
 			break;
 		}
 		case latteParser.DECL: {
@@ -197,6 +204,7 @@ public class JVMCompiler {
 
 				int freeIdShift = freeId + i - 1;
 				storage_vars.peek().put(ident, freeIdShift);
+				storage_var_types.peek().put(ident, JVMTypeForVar(varType));
 
 				switch (varType) {
 				case latteParser.TYPE_INT:
@@ -207,6 +215,15 @@ public class JVMCompiler {
 					    JVMwrite("ldc 0", 1);	
 					}
 					JVMwrite("istore " + freeIdShift, 1);
+					break;
+				}
+				case latteParser.TYPE_STRING: {
+					if (declaration.size() == 2) {
+					    JVMtraverse(declaration.get(1));
+					} else {
+					    JVMwrite("ldc \"\"", 1);	
+					}
+					JVMwrite("astore " + freeIdShift, 1);
 					break;
 				}
 				default:
@@ -220,7 +237,11 @@ public class JVMCompiler {
 			if (functionName.compareTo("printInt") == 0) {
 				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
 				JVMtraverse(children.get(1));
-				JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);	
+				JVMwrite("invokevirtual java/io/PrintStream/println(I)V", 1);
+			} else if (functionName.compareTo("printString") == 0) {
+				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+				JVMtraverse(children.get(1));
+				JVMwrite("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
 			} else {
 				for (int i = 1; i < children.size(); i++) {
 					JVMtraverse(children.get(i));
@@ -264,7 +285,8 @@ public class JVMCompiler {
 			JVMtraverse(children.get(1));
 			String idName = children.get(0).getText();
 			int idNo = JVMVarToId(idName);
-			JVMwrite("istore " + idNo, 1);
+			String type = JVMGetVarType(idName);
+			JVMwrite(type + "store " + idNo, 1);
 			break;
 		}
 		case latteParser.DECR: {
@@ -428,7 +450,8 @@ public class JVMCompiler {
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = JVMVarToId(idName);
-			JVMwrite("iload " + idNo, 1);
+			String type = JVMGetVarType(idName);
+			JVMwrite(type + "load " + idNo, 1);
 			break;
 		}
 		case latteParser.INTEGER: {
@@ -444,6 +467,7 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.STRING: {
+			JVMwrite("ldc " + tree.getText(), 1);
 			break;
 		}
 		default: {
@@ -459,6 +483,25 @@ public class JVMCompiler {
 		}
 
 		return token_type;
+	}
+
+	private String JVMGetVarType(String idName) {
+		for(int i = storage_var_types.size()-1; i >= 0; i--) {
+			HashMap<String,String> locVar = storage_var_types.get(i);
+			if (locVar.containsKey(idName)) {
+				return locVar.get(idName);
+			}
+		}
+		return null;
+	}
+
+	private String JVMTypeForVar(int varType) {
+		switch (varType) {
+		case latteParser.TYPE_STRING:
+			return "a";
+		default:
+			return "i";
+		}
 	}
 
 	private int JVMVarToId(String idName) {

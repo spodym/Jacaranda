@@ -1,7 +1,7 @@
 int main() {
     int i;
-    boolean a = false;
-    if (1 >= 2) { printInt(2012); };
+    string s;
+    printString(s);
 
     /*if (true && true) { printInt(1); };
     if (true && false) { printInt(2); };
@@ -12,42 +12,15 @@ int main() {
     if (false || true) { printInt(7); };
     if (false || false) { printInt(8); };*/
 
-    /*printInt(4/2);
-    printInt(1/2);
-    printInt(1/3);
-    printInt(9/2);
-    printInt(1*2);
-    printInt(2*2);
-    printInt(3*2);
-    printInt(4*2);*/
-
-    //i++;
-    //i++;
-    /*{
-        int a = foo(i, 42);
-        if (1) {
-            printInt(a);
-        } else {
-            printInt(29);
-        }
-    }
-    {
-        int a = -10;
-        while (a) {
-            a = a + 1;
-            printInt(a);
-        }
-    }*/
-	//printInt(i);
-	//printInt(0);
     return i;
 }
 
 /*
-int foo(int d, int x) {
-    int a, b, c;
-    d = 109;
-    int e, f, g;
-    return x;
+string foo() {
+    string a = "foo";
+    return a;
 }
-*/
+
+string bar(string a) {
+    return "hello" + a;
+}*/
