@@ -312,7 +312,12 @@ public class JVMCompiler {
 		    JVMwrite("idiv", 1);
 		    break;
 		}
-		case latteParser.OP_MOD:
+		case latteParser.OP_MOD: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+		    JVMwrite("irem", 1);
+			break;
+		}
 		case latteParser.OP_LTH: {
 			JVMtraverse(children.get(0));
 			JVMtraverse(children.get(1));
