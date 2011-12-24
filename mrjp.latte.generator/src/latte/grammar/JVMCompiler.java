@@ -313,16 +313,63 @@ public class JVMCompiler {
 		    break;
 		}
 		case latteParser.OP_MOD:
-		case latteParser.OP_LTH:
-		case latteParser.OP_LE:
-		case latteParser.OP_GTH:
-		case latteParser.OP_GE:
+		case latteParser.OP_LTH: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("if_icmplt " + elseLabel, 1);
+			JVMwrite("iconst_0");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_1");
+			JVMwrite(endifLabel+":");
+			break;
+		}
+		case latteParser.OP_LE: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("if_icmple " + elseLabel, 1);
+			JVMwrite("iconst_0");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_1");
+			JVMwrite(endifLabel+":");
+			break;
+		}
+		case latteParser.OP_GTH: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("if_icmpgt " + elseLabel, 1);
+			JVMwrite("iconst_0");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_1");
+			JVMwrite(endifLabel+":");
+			break;
+		}
+		case latteParser.OP_GE: {
+			JVMtraverse(children.get(0));
+			JVMtraverse(children.get(1));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("if_icmpge " + elseLabel, 1);
+			JVMwrite("iconst_0");
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_1");
+			JVMwrite(endifLabel+":");
+			break;
+		}
 		case latteParser.OP_EQU: {
 			JVMtraverse(children.get(0));
 			JVMtraverse(children.get(1));
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
-			JVMtraverse(children.get(0));
 			JVMwrite("if_icmpne " + elseLabel, 1);
 			JVMwrite("iconst_1");
 			JVMwrite("goto " + endifLabel, 1);
@@ -336,7 +383,6 @@ public class JVMCompiler {
 			JVMtraverse(children.get(1));
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
-			JVMtraverse(children.get(0));
 			JVMwrite("if_icmpeq " + elseLabel, 1);
 			JVMwrite("iconst_1");
 			JVMwrite("goto " + endifLabel, 1);
