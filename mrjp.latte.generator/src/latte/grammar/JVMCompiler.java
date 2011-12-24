@@ -17,6 +17,7 @@ public class JVMCompiler {
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
 	private Stack<HashMap<String, String>> storage_var_types = new Stack<HashMap<String,String>>();
 	private int labelCounter;
+	private String currentReturnType;
 	private String className;
 	private CommonTree troot;
 	FileWriter fwriter;
@@ -157,6 +158,7 @@ public class JVMCompiler {
 		    JVMwrite(".limit locals 100", 1);
 		    
 		    // Traversing function body.
+		    currentReturnType = JVMTypeForVar(children.get(0).getType());
 			if (args.getType() == latteParser.ARGS) {
 				storage_vars.push(new HashMap<String, Integer>());
 				storage_var_types.push(new HashMap<String, String>());
@@ -303,7 +305,7 @@ public class JVMCompiler {
 		}
 		case latteParser.RET: {
 			JVMtraverse(children.get(0));
-		    JVMwrite("ireturn", 1);
+		    JVMwrite(currentReturnType + "return", 1);
 			break;
 		}
 		case latteParser.RETV: {
@@ -311,9 +313,27 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.OP_PLUS: {
-			JVMtraverse(children.get(0));
-			JVMtraverse(children.get(1));
-		    JVMwrite("iadd", 1);
+			String type = "i";
+			if (children.get(0).getType() == latteParser.VAR_IDENT) {
+				String idName = children.get(0).getChild(0).getText();
+				type = JVMGetVarType(idName);
+			} else if (children.get(0).getType() == latteParser.STRING) {
+				type = "a";
+			}
+			if (type.compareTo("a") == 0) {
+				JVMwrite("new java/lang/StringBuilder", 1);
+				JVMwrite("dup", 1);
+				JVMwrite("invokespecial java/lang/StringBuilder/<init>()V", 1);
+				JVMtraverse(children.get(0));
+				JVMwrite("invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
+				JVMtraverse(children.get(1));
+				JVMwrite("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
+				JVMwrite("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
+			} else {
+				JVMtraverse(children.get(0));
+				JVMtraverse(children.get(1));
+			    JVMwrite("iadd", 1);
+			}
 		    break;
 		}
 		case latteParser.OP_MINUS: {

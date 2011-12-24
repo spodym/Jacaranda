@@ -1,6 +1,6 @@
 int main() {
     int i;
-    string s;
+    string s = foo();
     printString(s);
 
     /*if (true && true) { printInt(1); };
@@ -15,12 +15,11 @@ int main() {
     return i;
 }
 
-/*
 string foo() {
-    string a = "foo";
-    return a;
+    string a = " world";
+    return bar(a);
 }
 
 string bar(string a) {
     return "hello" + a;
-}*/
+}
