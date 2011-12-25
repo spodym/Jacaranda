@@ -1,6 +1,6 @@
 int main() {
     int i;
-    string s = foo();
+    string s = "asd" + " asd" + " asd";
     printString(s);
 
     /*if (true && true) { printInt(1); };

@@ -155,6 +155,7 @@ public class JVMCompiler {
 		case latteParser.TOP_DEF: {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
+		    JVMwrite("");
 			JVMwrite(".method public static " + storage_func.get(name));
 		    JVMwrite(".limit stack 5", 1);
 		    JVMwrite(".limit locals 100", 1);
@@ -255,6 +256,51 @@ public class JVMCompiler {
 				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
 				JVMtraverse(children.get(1));
 				JVMwrite("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
+			} else if (functionName.compareTo("readInt") == 0) {
+				String startRead = JVMNextLabel();
+				String endRead = JVMNextLabel();
+				int freeId = JVMFreeVarId(storage_vars);
+				int freeId2 = freeId + 1;
+				JVMwrite("ldc 0", 1);
+			    JVMwrite("istore " + freeId, 1);
+				JVMwrite(startRead+":");
+				JVMwrite("getstatic java/lang/System/in Ljava/io/InputStream;", 1);
+				JVMwrite("invokevirtual java/io/InputStream/read()I ", 1);
+				JVMwrite("istore " + freeId2, 1);
+				JVMwrite("iload " + freeId2, 1);
+				JVMwrite("ldc 10", 1); 
+				JVMwrite("isub", 1);
+				JVMwrite("ifeq " + endRead, 1); 
+				JVMwrite("iload " + freeId2, 1);
+				JVMwrite("ldc 32", 1); 
+				JVMwrite("isub", 1);
+				JVMwrite("ifeq " + endRead, 1); 
+				JVMwrite("iload " + freeId2, 1);
+				JVMwrite("ldc 48", 1); 
+				JVMwrite("isub ", 1);
+				JVMwrite("ldc 10 ", 1);
+				JVMwrite("iload " + freeId, 1);
+				JVMwrite("imul ", 1);
+				JVMwrite("iadd ", 1);
+				JVMwrite("istore " + freeId, 1);
+				JVMwrite("goto " + startRead, 1);
+				JVMwrite(endRead+":");
+				JVMwrite("iload " + freeId, 1);
+			} else if (functionName.compareTo("readString") == 0) {
+				int freeId = JVMFreeVarId(storage_vars);
+				int freeId2 = freeId + 1;
+				JVMwrite("new java/io/InputStreamReader", 1);
+				JVMwrite("dup", 1);
+				JVMwrite("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
+				JVMwrite("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
+				JVMwrite("astore " + freeId, 1);
+				JVMwrite("new java/io/BufferedReader", 1);
+				JVMwrite("dup", 1);
+				JVMwrite("aload " + freeId, 1);
+				JVMwrite("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
+				JVMwrite("astore " + freeId2, 1);
+				JVMwrite("aload " + freeId2, 1);
+				JVMwrite("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
 			} else {
 				for (int i = 1; i < children.size(); i++) {
 					JVMtraverse(children.get(i));
@@ -324,13 +370,7 @@ public class JVMCompiler {
 			break;
 		}
 		case latteParser.OP_PLUS: {
-			String type = "i";
-			if (children.get(0).getType() == latteParser.VAR_IDENT) {
-				String idName = children.get(0).getChild(0).getText();
-				type = JVMGetVarType(idName);
-			} else if (children.get(0).getType() == latteParser.STRING) {
-				type = "a";
-			}
+			String type = JVMCheckPlusOpType(children.get(0));
 			if (type.compareTo("a") == 0) {
 				JVMwrite("new java/lang/StringBuilder", 1);
 				JVMwrite("dup", 1);
@@ -514,6 +554,19 @@ public class JVMCompiler {
 		}
 
 		return token_type;
+	}
+
+	private String JVMCheckPlusOpType(CommonTree node) {
+		String type = "i";
+		if (node.getType() == latteParser.VAR_IDENT) {
+			String idName = node.getChild(0).getText();
+			type = JVMGetVarType(idName);
+		} else if (node.getType() == latteParser.STRING) {
+			type = "a";
+		} else if (node.getType() == latteParser.OP_PLUS) {
+			type = JVMCheckPlusOpType((CommonTree)node.getChild(0));
+		}
+		return type;
 	}
 
 	private String JVMGetVarType(String idName) {
