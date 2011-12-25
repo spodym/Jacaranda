@@ -217,8 +217,6 @@ public class JVMCompiler {
 				String ident = declaration.get(0).token.getText();
 
 				int freeIdShift = freeId + i - 1;
-				storage_vars.peek().put(ident, freeIdShift);
-				storage_var_types.peek().put(ident, JVMTypeForVar(varType));
 
 				switch (varType) {
 				case latteParser.TYPE_INT:
@@ -243,6 +241,9 @@ public class JVMCompiler {
 				default:
 					break;
 				}
+
+				storage_vars.peek().put(ident, freeIdShift);
+				storage_var_types.peek().put(ident, JVMTypeForVar(varType));
 			}
 			break;
 		}
