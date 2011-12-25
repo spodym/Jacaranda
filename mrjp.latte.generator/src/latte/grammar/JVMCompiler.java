@@ -180,7 +180,16 @@ public class JVMCompiler {
 			} else {
 				JVMtraverse(children.get(2));
 			}
-		    
+
+			// This is piece of ugly hack... TODO: fix this later
+			if (currentReturnType.compareTo("a") == 0) {
+				JVMwrite("ldc \"\"", 1);
+			}
+			if (currentReturnType.compareTo("i") == 0) {
+				JVMwrite("ldc 0", 1);
+			}
+			JVMwrite(currentReturnType + "return", 1);
+
 			JVMwrite(".end method");
 			break;
 		}
@@ -368,10 +377,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmplt " + elseLabel, 1);
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -381,10 +390,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmple " + elseLabel, 1);
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -394,10 +403,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmpgt " + elseLabel, 1);
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -407,10 +416,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmpge " + elseLabel, 1);
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -420,10 +429,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmpne " + elseLabel, 1);
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -433,10 +442,10 @@ public class JVMCompiler {
 			String elseLabel = JVMNextLabel();
 			String endifLabel = JVMNextLabel();
 			JVMwrite("if_icmpeq " + elseLabel, 1);
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -462,10 +471,10 @@ public class JVMCompiler {
 			String endifLabel = JVMNextLabel();
 			JVMtraverse(children.get(0));
 			JVMwrite("ifne " + elseLabel, 1);
-			JVMwrite("iconst_1");
+			JVMwrite("iconst_1", 1);
 			JVMwrite("goto " + endifLabel, 1);
 			JVMwrite(elseLabel+":");
-			JVMwrite("iconst_0");
+			JVMwrite("iconst_0", 1);
 			JVMwrite(endifLabel+":");
 			break;
 		}
@@ -521,6 +530,8 @@ public class JVMCompiler {
 		switch (varType) {
 		case latteParser.TYPE_STRING:
 			return "a";
+		case latteParser.TYPE_VOID:
+			return "";
 		default:
 			return "i";
 		}

@@ -23,3 +23,7 @@ string foo() {
 string bar(string a) {
     return "hello" + a;
 }
+
+void fee() {
+    1 < 2;
+}
