@@ -478,14 +478,28 @@ public class JVMCompiler {
 		}
 		case latteParser.OP_AND: {
 			JVMtraverse(children.get(0));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("ifeq " + elseLabel, 1);
 			JVMtraverse(children.get(1));
-		    JVMwrite("iand", 1);
+			JVMwrite("ifeq " + elseLabel, 1);
+			JVMwrite("iconst_1", 1);
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
+			JVMwrite("iconst_0", 1);
+			JVMwrite(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_OR: {
 			JVMtraverse(children.get(0));
+			String elseLabel = JVMNextLabel();
+			String endifLabel = JVMNextLabel();
+			JVMwrite("ifeq " + elseLabel, 1);
+			JVMwrite("iconst_1", 1);
+			JVMwrite("goto " + endifLabel, 1);
+			JVMwrite(elseLabel+":");
 			JVMtraverse(children.get(1));
-		    JVMwrite("ior", 1);
+			JVMwrite(endifLabel+":");
 			break;
 		}
 		case latteParser.NEGATION: {
