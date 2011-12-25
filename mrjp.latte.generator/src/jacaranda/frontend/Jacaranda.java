@@ -26,7 +26,7 @@ public class Jacaranda {
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 			builder.checkType(tree);
-			JVMCompiler jvm = new JVMCompiler("out", tree);
+			JVMCompiler jvm = new JVMCompiler(getFileName(file_path), tree);
 			jvm.JVMgenerate();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,6 +37,15 @@ public class Jacaranda {
 		}
 	}
 	
+	private static String getFileName(String file_path) {
+		File file = new File(file_path);
+		String name = file.getName();
+		if (name.lastIndexOf(".") != -1) {
+			name = name.substring(0, name.lastIndexOf("."));
+		}
+		return name;
+	}
+
 	private static String readFile(String path) throws IOException {
 		FileInputStream stream = new FileInputStream(new File(path));
 		try {
