@@ -16,10 +16,16 @@ jacaranda.jar
 jacaranda_jar.xml
 *.j
 
+# jvm output
+classes
+
+#assembler output
+
 # tutorial & testing
 ANTLRTutorial/
 latte_tests/my_tests/
 jasmintest/
+asseblertest/
 
 # generic files to ignore
 *~
