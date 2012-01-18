@@ -1,29 +1,13 @@
 int main() {
-    int i;
-    string s = "asd" + " asd" + " asd";
-    printString(s);
-
-    /*if (true && true) { printInt(1); };
-    if (true && false) { printInt(2); };
-    if (false && true) { printInt(3); };
-    if (false && false) { printInt(4); };
-    if (true || true) { printInt(5); };
-    if (true || false) { printInt(6); };
-    if (false || true) { printInt(7); };
-    if (false || false) { printInt(8); };*/
-
-    return i;
+    int a = foo();
+    int b = bar();
+    return a + b;
 }
 
-string foo() {
-    string a = " world";
-    return bar(a);
+int foo() {
+    return 1;
 }
 
-string bar(string a) {
-    return "hello" + a;
-}
-
-void fee() {
-    1 < 2;
+int bar() {
+    return 2;
 }

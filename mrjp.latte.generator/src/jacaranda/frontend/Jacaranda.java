@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import latte.grammar.JVMCompiler;
 import latte.grammar.TreeBuilder;
 import latte.grammar.LatteException;
+import latte.grammar.X86Compiler;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
@@ -26,8 +27,8 @@ public class Jacaranda {
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 			builder.checkType(tree);
-			JVMCompiler jvm = new JVMCompiler(getFileName(file_path), tree);
-			jvm.JVMgenerate();
+			X86Compiler x86 = new X86Compiler(getFileName(file_path), tree);
+			x86.X86generate();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RecognitionException e) {

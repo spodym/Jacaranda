@@ -30,11 +30,11 @@ public class X86Compiler {
 		this.className = name;
 		this.troot = tree;
 		
-		fout = new File(name+".j");
+		fout = new File(name+".s");
 		if(!fout.exists()){
 			fout.createNewFile();
 		}
-		this.fwriter = new FileWriter(className+".j");
+		this.fwriter = new FileWriter(className+".s");
 		this.output = new BufferedWriter(fwriter);
 	}
 
@@ -57,26 +57,12 @@ public class X86Compiler {
 	public void X86generate() throws IOException {
 		X86LoadFunctions();
 
-		X86write(".class public " + className);
-		X86write(".super java/lang/Object");
-		X86write(".method public <init>()V");
-		X86write("aload_0", 1);
-		X86write("invokespecial java/lang/Object/<init>()V", 1);
-		X86write("return", 1);
-		X86write(".end method");
-
-		X86write(".method public static main([Ljava/lang/String;)V");
-		X86write("invokestatic "+className+".main()I", 1);
-		X86write("pop", 1);
-		X86write("return", 1);
-		X86write(".end method");
+		X86write(".file	\"" + this.className + ".lat \"", 1);
+		X86write(".text", 1);
 		
 		X86traverse(troot);
 		
 		X86writeEnd();
-
-		//String[] args = { fout.getPath() };
-		//jasmin.Main.main(args);
 	}
 
 	private void X86LoadFunctions() {
@@ -156,9 +142,16 @@ public class X86Compiler {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
 		    X86write("");
-			X86write(".method public static " + storage_func.get(name));
-		    X86write(".limit stack 5", 1);
-		    X86write(".limit locals 100", 1);
+		    X86write(".globl "+name, 1);
+		    X86write(".type	"+name+", @function", 1);
+		    X86write(name+":");
+
+		    X86write(".cfi_startproc", 1);
+			X86write("pushl	%ebp", 1);
+			X86write(".cfi_def_cfa_offset 8", 1);
+			X86write(".cfi_offset 5, -8", 1);
+			X86write("movl	%esp, %ebp", 1);
+			X86write(".cfi_def_cfa_register 5", 1);
 		    
 		    // Traversing function body.
 		    currentReturnType = X86TypeForVar(children.get(0).getType());
@@ -182,16 +175,12 @@ public class X86Compiler {
 				X86traverse(children.get(2));
 			}
 
-			// This is piece of ugly hack... TODO: fix this later
-			if (currentReturnType.compareTo("a") == 0) {
-				X86write("ldc \"\"", 1);
-			}
-			if (currentReturnType.compareTo("i") == 0) {
-				X86write("ldc 0", 1);
-			}
-			X86write(currentReturnType + "return", 1);
+			X86write(".cfi_restore 5", 1);
+			X86write(".cfi_def_cfa 4, 4", 1);
+			X86write("ret", 1);
+			X86write(".cfi_endproc", 1);
 
-			X86write(".end method");
+			X86write(".size	"+name+", .-"+name, 1);
 			break;
 		}
 		case latteParser.BLOCK: {
