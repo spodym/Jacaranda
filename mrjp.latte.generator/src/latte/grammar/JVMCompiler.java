@@ -75,8 +75,8 @@ public class JVMCompiler {
 		
 		JVMwriteEnd();
 
-		String[] args = { fout.getPath() };
-		jasmin.Main.main(args);
+		//String[] args = { fout.getPath() };
+		//jasmin.Main.main(args);
 	}
 
 	private void JVMLoadFunctions() {
