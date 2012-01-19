@@ -238,12 +238,12 @@ public class X86Compiler {
 				storage_var_types.push(new HashMap<String, String>());
 				@SuppressWarnings("unchecked")
 				List<CommonTree> argsList = args.getChildren();
-				int freeId = X86FreeVarId(storage_vars);
+				int freeId = -4;
 				for (int i = 0; i < argsList.size(); i++) {
 					int type = argsList.get(i).getChild(0).getType();
 					String ident = argsList.get(i).getChild(1).getText();
-					int freeIdShift = freeId + i;
-					storage_vars.peek().put(ident, freeIdShift);
+					freeId = freeId - 4;
+					storage_vars.peek().put(ident, freeId);
 					storage_var_types.peek().put(ident, X86TypeForVar(type));
 				}
 				X86traverse(children.get(3));
@@ -563,8 +563,7 @@ public class X86Compiler {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
 			String type = X86GetVarType(idName);
-			X86write(type + "load " + idNo, 1);
-			break;
+			return idNo+"(%ebp)";
 		}
 		case latteParser.INTEGER: {
 			return "$"+tree.getText();
