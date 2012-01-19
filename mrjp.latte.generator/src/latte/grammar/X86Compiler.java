@@ -401,9 +401,16 @@ public class X86Compiler {
 				//X86write("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
 				//X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
 			} else {
-				X86traverse(children.get(0));
-				X86traverse(children.get(1));
-			    //X86write("iadd", 1);
+				String src1 = X86traverse(children.get(0));
+			    X86write("push", src1);
+				String reg = X86traverse(children.get(1));
+				if (reg.startsWith("$")) {
+				    X86write("mov", reg+", %eax");
+				    reg = "%eax";
+				}
+			    X86write("pop", "%edx");
+			    X86write("add", "%edx, "+reg);
+			    return reg;
 			}
 		    break;
 		}
@@ -556,7 +563,7 @@ public class X86Compiler {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
 			String type = X86GetVarType(idName);
-			//X86write(type + "load " + idNo, 1);
+			X86write(type + "load " + idNo, 1);
 			break;
 		}
 		case latteParser.INTEGER: {
