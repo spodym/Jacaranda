@@ -673,7 +673,7 @@ public class X86Compiler {
 			HashMap<String, Integer> hashMap = (HashMap<String, Integer>) iterator.next();
 			freeId += hashMap.size();
 		}
-		return freeId;
+		return freeId * 4 + 4;
 	}
 		
 }
