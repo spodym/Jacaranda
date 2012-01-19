@@ -145,8 +145,8 @@ public class X86Compiler {
 		    X86write("");
 		    X86write(name+":");
 
-			X86write("pushl	%ebp", 1);
-			X86write("movl	%esp, %ebp", 1);
+			X86write("pushl %ebp", 1);
+			X86write("movl %esp, %ebp", 1);
 
 			if (name.compareTo("main") == 0) {
 				X86write("and $0xfffffff0,%esp", 1);
@@ -214,18 +214,18 @@ public class X86Compiler {
 					if (declaration.size() == 2) {
 					    X86traverse(declaration.get(1));
 					} else {
-					    X86write("ldc 0", 1);	
+//					    X86write("ldc 0", 1);	
 					}
-					X86write("istore " + freeIdShift, 1);
+//					X86write("istore " + freeIdShift, 1);
 					break;
 				}
 				case latteParser.TYPE_STRING: {
 					if (declaration.size() == 2) {
 					    X86traverse(declaration.get(1));
 					} else {
-					    X86write("ldc \"\"", 1);	
+//					    X86write("ldc \"\"", 1);	
 					}
-					X86write("astore " + freeIdShift, 1);
+//					X86write("astore " + freeIdShift, 1);
 					break;
 				}
 				default:
@@ -240,49 +240,49 @@ public class X86Compiler {
 		case latteParser.EAPP: {
 			String functionName = children.get(0).getText();
 			if (functionName.compareTo("printInt") == 0) {
-				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+//				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
 				X86traverse(children.get(1));
-				X86write("invokevirtual java/io/PrintStream/println(I)V", 1);
+//				X86write("invokevirtual java/io/PrintStream/println(I)V", 1);
 			} else if (functionName.compareTo("printString") == 0) {
-				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+//				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
 				X86traverse(children.get(1));
-				X86write("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
+//				X86write("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
 			} else if (functionName.compareTo("readInt") == 0) {
 				int freeId = X86FreeVarId(storage_vars);
 				int freeId2 = freeId + 1;
-				X86write("new java/io/InputStreamReader", 1);
-				X86write("dup", 1);
-				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
-				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
-				X86write("astore " + freeId, 1);
-				X86write("new java/io/BufferedReader", 1);
-				X86write("dup", 1);
-				X86write("aload " + freeId, 1);
-				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
-				X86write("astore " + freeId2, 1);
-				X86write("aload " + freeId2, 1);
-				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
-				X86write("invokestatic java/lang/Integer/parseInt(Ljava/lang/String;)I", 1);
+//				X86write("new java/io/InputStreamReader", 1);
+//				X86write("dup", 1);
+//				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
+//				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
+//				X86write("astore " + freeId, 1);
+//				X86write("new java/io/BufferedReader", 1);
+//				X86write("dup", 1);
+//				X86write("aload " + freeId, 1);
+//				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
+//				X86write("astore " + freeId2, 1);
+//				X86write("aload " + freeId2, 1);
+//				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
+//				X86write("invokestatic java/lang/Integer/parseInt(Ljava/lang/String;)I", 1);
 			} else if (functionName.compareTo("readString") == 0) {
 				int freeId = X86FreeVarId(storage_vars);
 				int freeId2 = freeId + 1;
-				X86write("new java/io/InputStreamReader", 1);
-				X86write("dup", 1);
-				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
-				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
-				X86write("astore " + freeId, 1);
-				X86write("new java/io/BufferedReader", 1);
-				X86write("dup", 1);
-				X86write("aload " + freeId, 1);
-				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
-				X86write("astore " + freeId2, 1);
-				X86write("aload " + freeId2, 1);
-				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
+//				X86write("new java/io/InputStreamReader", 1);
+//				X86write("dup", 1);
+//				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
+//				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
+//				X86write("astore " + freeId, 1);
+//				X86write("new java/io/BufferedReader", 1);
+//				X86write("dup", 1);
+//				X86write("aload " + freeId, 1);
+//				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
+//				X86write("astore " + freeId2, 1);
+//				X86write("aload " + freeId2, 1);
+//				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
 			} else {
 				for (int i = 1; i < children.size(); i++) {
 					X86traverse(children.get(i));
 				}
-				X86write("invokestatic "+className+"."+storage_func.get(functionName), 1);
+				//X86write("invokestatic "+className+"."+storage_func.get(functionName), 1);
 			}
 			break;
 		}
@@ -291,30 +291,30 @@ public class X86Compiler {
 				String elseLabel = X86NextLabel();
 				String endifLabel = X86NextLabel();
 				X86traverse(children.get(0));
-				X86write("ifeq " + elseLabel, 1);
+				//X86write("ifeq " + elseLabel, 1);
 				X86traverse(children.get(1));
-				X86write("goto " + endifLabel, 1);
-				X86write(elseLabel+":");
+				//X86write("goto " + endifLabel, 1);
+				//X86write(elseLabel+":");
 				X86traverse(children.get(2));
-				X86write(endifLabel+":");
+				//X86write(endifLabel+":");
 			} else {
 				String endifLabel = X86NextLabel();
 				X86traverse(children.get(0));
-				X86write("ifeq " + endifLabel, 1);
+				//X86write("ifeq " + endifLabel, 1);
 				X86traverse(children.get(1));
-				X86write(endifLabel+":");
+				//X86write(endifLabel+":");
 			}
 			break;
 		}
 		case latteParser.SWHILE: {
 			String whilebodyLabel = X86NextLabel();
 			String endwhileLabel = X86NextLabel();
-			X86write(whilebodyLabel+":");
+			//X86write(whilebodyLabel+":");
 			X86traverse(children.get(0));
-			X86write("ifeq " + endwhileLabel, 1);
+			//X86write("ifeq " + endwhileLabel, 1);
 			X86traverse(children.get(1));
-			X86write("goto " + whilebodyLabel, 1);
-			X86write(endwhileLabel+":");
+			//X86write("goto " + whilebodyLabel, 1);
+			//X86write(endwhileLabel+":");
 			break;
 		}
 		case latteParser.ASS: {
@@ -322,24 +322,24 @@ public class X86Compiler {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
 			String type = X86GetVarType(idName);
-			X86write(type + "store " + idNo, 1);
+			//X86write(type + "store " + idNo, 1);
 			break;
 		}
 		case latteParser.DECR: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-		    X86write("iinc " + idNo + " -1", 1);
+		    //X86write("iinc " + idNo + " -1", 1);
 			break;
 		}
 		case latteParser.INCR: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-		    X86write("iinc " + idNo + " 1", 1);
+		    //X86write("iinc " + idNo + " 1", 1);
 			break;
 		}
 		case latteParser.RET: {
 			String src = X86traverse(children.get(0));
-		    X86write("mov "+src+", %eax", 1);
+		    //X86write("mov "+src+", %eax", 1);
 			break;
 		}
 		case latteParser.RETV: {
@@ -348,43 +348,43 @@ public class X86Compiler {
 		case latteParser.OP_PLUS: {
 			String type = X86CheckPlusOpType(children.get(0));
 			if (type.compareTo("a") == 0) {
-				X86write("new java/lang/StringBuilder", 1);
-				X86write("dup", 1);
-				X86write("invokespecial java/lang/StringBuilder/<init>()V", 1);
+				//X86write("new java/lang/StringBuilder", 1);
+				//X86write("dup", 1);
+				//X86write("invokespecial java/lang/StringBuilder/<init>()V", 1);
 				X86traverse(children.get(0));
-				X86write("invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
+				//X86write("invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
 				X86traverse(children.get(1));
-				X86write("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
-				X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
+				//X86write("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
+				//X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
 			} else {
 				X86traverse(children.get(0));
 				X86traverse(children.get(1));
-			    X86write("iadd", 1);
+			    //X86write("iadd", 1);
 			}
 		    break;
 		}
 		case latteParser.OP_MINUS: {
 			X86traverse(children.get(0));
 			X86traverse(children.get(1));
-		    X86write("isub", 1);
+		    //X86write("isub", 1);
 		    break;
 		}
 		case latteParser.OP_TIMES: {
 			X86traverse(children.get(0));
 			X86traverse(children.get(1));
-		    X86write("imul", 1);
+		    //X86write("imul", 1);
 		    break;
 		}
 		case latteParser.OP_DIV: {
 			X86traverse(children.get(0));
 			X86traverse(children.get(1));
-		    X86write("idiv", 1);
+		    //X86write("idiv", 1);
 		    break;
 		}
 		case latteParser.OP_MOD: {
 			X86traverse(children.get(0));
 			X86traverse(children.get(1));
-		    X86write("irem", 1);
+		    //X86write("irem", 1);
 			break;
 		}
 		case latteParser.OP_LTH: {
@@ -392,12 +392,12 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmplt " + elseLabel, 1);
-			X86write("iconst_0", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_1", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmplt " + elseLabel, 1);
+			//X86write("iconst_0", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_1", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_LE: {
@@ -405,12 +405,12 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmple " + elseLabel, 1);
-			X86write("iconst_0", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_1", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmple " + elseLabel, 1);
+			//X86write("iconst_0", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_1", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_GTH: {
@@ -418,12 +418,12 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmpgt " + elseLabel, 1);
-			X86write("iconst_0", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_1", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmpgt " + elseLabel, 1);
+			//X86write("iconst_0", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_1", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_GE: {
@@ -431,12 +431,12 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmpge " + elseLabel, 1);
-			X86write("iconst_0", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_1", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmpge " + elseLabel, 1);
+			//X86write("iconst_0", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_1", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_EQU: {
@@ -444,12 +444,12 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmpne " + elseLabel, 1);
-			X86write("iconst_1", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_0", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmpne " + elseLabel, 1);
+			//X86write("iconst_1", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_0", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_NE: {
@@ -457,78 +457,77 @@ public class X86Compiler {
 			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("if_icmpeq " + elseLabel, 1);
-			X86write("iconst_1", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_0", 1);
-			X86write(endifLabel+":");
+			//X86write("if_icmpeq " + elseLabel, 1);
+			//X86write("iconst_1", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_0", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_AND: {
 			X86traverse(children.get(0));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("ifeq " + elseLabel, 1);
+			//X86write("ifeq " + elseLabel, 1);
 			X86traverse(children.get(1));
-			X86write("ifeq " + elseLabel, 1);
-			X86write("iconst_1", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_0", 1);
-			X86write(endifLabel+":");
+			//X86write("ifeq " + elseLabel, 1);
+			//X86write("iconst_1", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_0", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.OP_OR: {
 			X86traverse(children.get(0));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86write("ifeq " + elseLabel, 1);
-			X86write("iconst_1", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
+			//X86write("ifeq " + elseLabel, 1);
+			//X86write("iconst_1", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
 			X86traverse(children.get(1));
-			X86write(endifLabel+":");
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.NEGATION: {
 			X86traverse(children.get(0));
-		    X86write("ineg", 1);
+		    //X86write("ineg", 1);
 		    break;
 		}
 		case latteParser.NOT: {
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
 			X86traverse(children.get(0));
-			X86write("ifne " + elseLabel, 1);
-			X86write("iconst_1", 1);
-			X86write("goto " + endifLabel, 1);
-			X86write(elseLabel+":");
-			X86write("iconst_0", 1);
-			X86write(endifLabel+":");
+			//X86write("ifne " + elseLabel, 1);
+			//X86write("iconst_1", 1);
+			//X86write("goto " + endifLabel, 1);
+			//X86write(elseLabel+":");
+			//X86write("iconst_0", 1);
+			//X86write(endifLabel+":");
 			break;
 		}
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
 			String type = X86GetVarType(idName);
-			X86write(type + "load " + idNo, 1);
+			//X86write(type + "load " + idNo, 1);
 			break;
 		}
 		case latteParser.INTEGER: {
-			X86write("ldc " + tree.getText(), 1);
-			break;
+			return "$"+tree.getText();
 		}
 		case latteParser.FALSE: {
-			X86write("ldc 0", 1);
+			//X86write("ldc 0", 1);
 			break;
 		}
 		case latteParser.TRUE: {
-			X86write("ldc 1", 1);
+			//X86write("ldc 1", 1);
 			break;
 		}
 		case latteParser.STRING: {
-			X86write("ldc " + tree.getText(), 1);
+			//X86write("ldc " + tree.getText(), 1);
 			break;
 		}
 		default: {
