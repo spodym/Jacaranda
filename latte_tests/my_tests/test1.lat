@@ -1,11 +1,11 @@
 int main() {
-    int a = foo();
+    int a = foo(42);
     int b = bar();
     return a + b;
 }
 
-int foo() {
-    return 1;
+int foo(int a) {
+    return a + 1;
 }
 
 int bar() {

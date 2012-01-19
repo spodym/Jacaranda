@@ -14,6 +14,7 @@ import java.util.Stack;
 public class X86Compiler {
 
 	private HashMap<String, String> storage_func = new HashMap<String, String>();
+	private HashMap<String, Integer> storage_func_max_locals = new HashMap<String, Integer>();
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
 	private Stack<HashMap<String, String>> storage_var_types = new Stack<HashMap<String,String>>();
 	private int labelCounter;
@@ -98,9 +99,77 @@ public class X86Compiler {
 				args = args.concat(X86EncodeType(type));
 			}
 		}
+		
+		int max_locals = X86CountLocals(topdef);
 
 		String jvmname = ident + "(" + args + ")" + out;
 		storage_func.put(ident, jvmname);
+		storage_func_max_locals.put(ident, max_locals);
+	}
+
+	private int X86CountLocals(CommonTree tree) {
+ 		int token_type = -1;
+		if (tree.token != null) {
+			token_type = tree.token.getType();
+		}
+		@SuppressWarnings("unchecked")
+		List<CommonTree> children = tree.getChildren();
+
+		switch (token_type) {
+
+		case latteParser.TOP_DEF: {
+			CommonTree args = children.get(2);
+		    // Traversing function body.
+			if (args.getType() == latteParser.ARGS) {
+				return X86CountLocals(children.get(3));
+			} else {
+				return X86CountLocals(children.get(2));
+			}
+		}
+		case latteParser.BLOCK: {
+			int max_count = 0;
+			storage_vars.push(new HashMap<String, Integer>());
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					int count = X86CountLocals(child);
+					if (count > max_count) {
+						max_count = count;
+					}
+				}
+			}
+			HashMap<String, Integer> peek = storage_vars.pop();
+			int bytes = 0;
+			for (Iterator<Integer> iterator = peek.values().iterator(); iterator.hasNext();) {
+				Integer bytes0 = iterator.next();
+				bytes += bytes0;
+			}
+			return max_count + bytes;
+		}
+		case latteParser.DECL: {
+			int varType = children.get(0).token.getType(); // TODO: for byte count
+			for(int i = 1; i < children.size(); i++) {
+				CommonTree child = children.get(i);
+				@SuppressWarnings("unchecked")
+				List<CommonTree> declaration = child.getChildren();
+				String ident = declaration.get(0).token.getText();
+				storage_vars.peek().put(ident, 4);
+			}
+			break;
+		}
+		default: {
+			if (children != null) {
+				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
+					CommonTree child = i.next();
+					return X86CountLocals(child);
+				}
+			}
+			break;
+		}
+		
+		}
+
+		return 0;
 	}
 
 	private String X86EncodeType(int type) {
@@ -141,16 +210,21 @@ public class X86Compiler {
 		case latteParser.TOP_DEF: {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
+			int max_bytes_for_locals = storage_func_max_locals.get(name);
+
 		    X86write("");
 		    X86write("");
 		    X86write(name+":");
 
-			X86write("pushl %ebp", 1);
-			X86write("movl %esp, %ebp", 1);
+			X86write("push %ebp", 1);
+			X86write("mov %esp, %ebp", 1);
 
 			if (name.compareTo("main") == 0) {
 				X86write("and $0xfffffff0,%esp", 1);
-				X86write("sub $0x10,%esp", 1);
+			}
+			
+			if (max_bytes_for_locals != 0) {
+				X86write("sub $"+max_bytes_for_locals+",%esp", 1);
 			}
 
 		    // Traversing function body.
@@ -175,6 +249,7 @@ public class X86Compiler {
 				X86traverse(children.get(2));
 			}
 
+			X86write("mov %ebp, %esp", 1);
 			if (name.compareTo("main") == 0) {
 				X86write("leave", 1);
 			} else {
@@ -282,7 +357,7 @@ public class X86Compiler {
 				for (int i = 1; i < children.size(); i++) {
 					X86traverse(children.get(i));
 				}
-				//X86write("invokestatic "+className+"."+storage_func.get(functionName), 1);
+//				X86write("invokestatic "+className+"."+storage_func.get(functionName), 1);
 			}
 			break;
 		}
@@ -339,7 +414,7 @@ public class X86Compiler {
 		}
 		case latteParser.RET: {
 			String src = X86traverse(children.get(0));
-		    //X86write("mov "+src+", %eax", 1);
+		    X86write("mov "+src+", %eax", 1);
 			break;
 		}
 		case latteParser.RETV: {
