@@ -318,51 +318,17 @@ public class X86Compiler {
 		case latteParser.EAPP: {
 			String functionName = children.get(0).getText();
 			if (functionName.compareTo("printInt") == 0) {
-//				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
-				X86traverse(children.get(1));
-//				X86write("invokevirtual java/io/PrintStream/println(I)V", 1);
 			} else if (functionName.compareTo("printString") == 0) {
-//				X86write("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
-				X86traverse(children.get(1));
-//				X86write("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
 			} else if (functionName.compareTo("readInt") == 0) {
-				int freeId = X86FreeVarId(storage_vars);
-				int freeId2 = freeId + 1;
-//				X86write("new java/io/InputStreamReader", 1);
-//				X86write("dup", 1);
-//				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
-//				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
-//				X86write("astore " + freeId, 1);
-//				X86write("new java/io/BufferedReader", 1);
-//				X86write("dup", 1);
-//				X86write("aload " + freeId, 1);
-//				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
-//				X86write("astore " + freeId2, 1);
-//				X86write("aload " + freeId2, 1);
-//				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
-//				X86write("invokestatic java/lang/Integer/parseInt(Ljava/lang/String;)I", 1);
 			} else if (functionName.compareTo("readString") == 0) {
-				int freeId = X86FreeVarId(storage_vars);
-				int freeId2 = freeId + 1;
-//				X86write("new java/io/InputStreamReader", 1);
-//				X86write("dup", 1);
-//				X86write("getstatic	java/lang/System/in Ljava/io/InputStream;", 1);
-//				X86write("invokespecial java/io/InputStreamReader/<init>(Ljava/io/InputStream;)V", 1);
-//				X86write("astore " + freeId, 1);
-//				X86write("new java/io/BufferedReader", 1);
-//				X86write("dup", 1);
-//				X86write("aload " + freeId, 1);
-//				X86write("invokespecial java/io/BufferedReader/<init>(Ljava/io/Reader;)V", 1);
-//				X86write("astore " + freeId2, 1);
-//				X86write("aload " + freeId2, 1);
-//				X86write("invokevirtual java/io/BufferedReader/readLine()Ljava/lang/String;", 1);
 			} else {
-				for (int i = 1; i < children.size(); i++) {
-					X86traverse(children.get(i));
+				for (int i = children.size() - 1; i > 0; --i) {
+					String src = X86traverse(children.get(i));
+					X86write("push", src);
 				}
-//				X86write("invokestatic "+className+"."+storage_func.get(functionName), 1);
+				X86write("call", functionName);
 			}
-			break;
+			return "%eax";
 		}
 		case latteParser.COND: {
 			if (children.size() == 3) {
