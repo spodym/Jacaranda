@@ -51,6 +51,10 @@ public class X86Compiler {
 		X86write(out, 0);
 	}
 
+	private void X86write(String func, String params) throws IOException {
+		X86write(func+"\t"+params, 2);
+	}
+
 	private void X86writeEnd() throws IOException {
 		output.close();
 	}
@@ -58,8 +62,8 @@ public class X86Compiler {
 	public void X86generate() throws IOException {
 		X86LoadFunctions();
 
-		X86write(".file	\"" + this.className + ".lat \"", 1);
-		X86write(".text", 1);
+		X86write(".file	\"" + this.className + ".lat \"", 2);
+		X86write(".text", 2);
 		
 		X86traverse(troot);
 		
@@ -216,15 +220,15 @@ public class X86Compiler {
 		    X86write("");
 		    X86write(name+":");
 
-			X86write("push %ebp", 1);
-			X86write("mov %esp, %ebp", 1);
+			X86write("push","%ebp");
+			X86write("mov", "%esp, %ebp");
 
 			if (name.compareTo("main") == 0) {
-				X86write("and $0xfffffff0,%esp", 1);
+				X86write("and", "$0xfffffff0,%esp");
 			}
 			
 			if (max_bytes_for_locals != 0) {
-				X86write("sub $"+max_bytes_for_locals+",%esp", 1);
+				X86write("sub", "$"+max_bytes_for_locals+",%esp");
 			}
 
 		    // Traversing function body.
@@ -249,13 +253,13 @@ public class X86Compiler {
 				X86traverse(children.get(2));
 			}
 
-			X86write("mov %ebp, %esp", 1);
+			X86write("mov", "%ebp, %esp");
 			if (name.compareTo("main") == 0) {
-				X86write("leave", 1);
+				X86write("leave", 2);
 			} else {
-				X86write("pop %ebp", 1);
+				X86write("pop", "%ebp");
 			}
-			X86write("ret", 1);
+			X86write("ret", 2);
 
 			break;
 		}
@@ -273,7 +277,6 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.DECL: {
-			int freeId = X86FreeVarId(storage_vars);
 			int varType = children.get(0).token.getType();
 			for(int i = 1; i < children.size(); i++) {
 				CommonTree child = children.get(i);
@@ -281,17 +284,17 @@ public class X86Compiler {
 				List<CommonTree> declaration = child.getChildren();
 				String ident = declaration.get(0).token.getText();
 
-				int freeIdShift = freeId + i - 1;
+				int freeIdShift = X86FreeVarId(storage_vars);
 
 				switch (varType) {
 				case latteParser.TYPE_INT:
 				case latteParser.TYPE_BOOLEAN: {
 					if (declaration.size() == 2) {
-					    X86traverse(declaration.get(1));
+					    String src = X86traverse(declaration.get(1));
+					    X86write("mov", src+", -"+freeIdShift+"(%ebp)");
 					} else {
-//					    X86write("ldc 0", 1);	
+					    X86write("mov", "$0, -"+freeIdShift+"(%ebp)");
 					}
-//					X86write("istore " + freeIdShift, 1);
 					break;
 				}
 				case latteParser.TYPE_STRING: {
@@ -414,7 +417,7 @@ public class X86Compiler {
 		}
 		case latteParser.RET: {
 			String src = X86traverse(children.get(0));
-		    X86write("mov "+src+", %eax", 1);
+		    X86write("mov", src+", %eax");
 			break;
 		}
 		case latteParser.RETV: {
