@@ -20,6 +20,7 @@ jacaranda_jar.xml
 classes
 
 #assembler output
+*.s
 
 # tutorial & testing
 ANTLRTutorial/
