@@ -128,7 +128,7 @@ public class X86Compiler {
 		return "Label"+labelCounter;
 	}
 
-	private int X86traverse(CommonTree tree) throws IOException {
+	private String X86traverse(CommonTree tree) throws IOException {
  		int token_type = -1;
 		if (tree.token != null) {
 			token_type = tree.token.getType();
@@ -142,17 +142,17 @@ public class X86Compiler {
 			String name = children.get(1).getText();
 			CommonTree args = children.get(2);
 		    X86write("");
-		    X86write(".globl "+name, 1);
-		    X86write(".type	"+name+", @function", 1);
+		    X86write("");
 		    X86write(name+":");
 
-		    X86write(".cfi_startproc", 1);
 			X86write("pushl	%ebp", 1);
-			X86write(".cfi_def_cfa_offset 8", 1);
-			X86write(".cfi_offset 5, -8", 1);
 			X86write("movl	%esp, %ebp", 1);
-			X86write(".cfi_def_cfa_register 5", 1);
-		    
+
+			if (name.compareTo("main") == 0) {
+				X86write("and $0xfffffff0,%esp", 1);
+				X86write("sub $0x10,%esp", 1);
+			}
+
 		    // Traversing function body.
 		    currentReturnType = X86TypeForVar(children.get(0).getType());
 			if (args.getType() == latteParser.ARGS) {
@@ -175,12 +175,13 @@ public class X86Compiler {
 				X86traverse(children.get(2));
 			}
 
-			X86write(".cfi_restore 5", 1);
-			X86write(".cfi_def_cfa 4, 4", 1);
+			if (name.compareTo("main") == 0) {
+				X86write("leave", 1);
+			} else {
+				X86write("pop %ebp", 1);
+			}
 			X86write("ret", 1);
-			X86write(".cfi_endproc", 1);
 
-			X86write(".size	"+name+", .-"+name, 1);
 			break;
 		}
 		case latteParser.BLOCK: {
@@ -337,12 +338,11 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.RET: {
-			X86traverse(children.get(0));
-		    X86write(currentReturnType + "return", 1);
+			String src = X86traverse(children.get(0));
+		    X86write("mov "+src+", %eax", 1);
 			break;
 		}
 		case latteParser.RETV: {
-		    X86write("return", 1);
 			break;
 		}
 		case latteParser.OP_PLUS: {
@@ -543,7 +543,7 @@ public class X86Compiler {
 		
 		}
 
-		return token_type;
+		return null;
 	}
 
 	private String X86CheckPlusOpType(CommonTree node) {
