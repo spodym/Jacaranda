@@ -369,12 +369,14 @@ public class X86Compiler {
 		case latteParser.SWHILE: {
 			String whilebodyLabel = X86NextLabel();
 			String endwhileLabel = X86NextLabel();
-			//X86write(whilebodyLabel+":");
-			X86traverse(children.get(0));
-			//X86write("ifeq " + endwhileLabel, 1);
+			X86write(whilebodyLabel+" :");
+			String src = X86traverse(children.get(0));
+			X86write("mov", src+", %eax");
+			X86write("cmp", "$1, %eax");
+			X86write("jne", endwhileLabel);
 			X86traverse(children.get(1));
-			//X86write("goto " + whilebodyLabel, 1);
-			//X86write(endwhileLabel+":");
+			X86write("jmp", whilebodyLabel);
+			X86write(endwhileLabel+" :");
 			break;
 		}
 		case latteParser.ASS: {
