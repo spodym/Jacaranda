@@ -1,8 +1,5 @@
 int main() {
-    int i = 10;
-    while (0 < i) {
-        i--;
-        printInt(i);
-    }
+    if (1 != 2) { printInt(1); } else { printInt(0); }
+    if (1 == 1) { printInt(1); } else { printInt(0); }
     return 1;
 }

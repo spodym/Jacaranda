@@ -481,88 +481,22 @@ public class X86Compiler {
 		    return "%eax";
 		}
 		case latteParser.OP_LTH: {
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			String src = X86traverse(children.get(1));
-		    X86write("pushl", src);
-		    src = X86traverse(children.get(0));
-			if (!src.startsWith("%eax")) {
-			    X86write("mov", src+", %eax");
-			}
-		    X86write("popl", "%ecx");
-			X86write("cmp", "%ecx, %eax");
-			X86write("jl", elseLabel);
-		    X86write("mov", "$0, %eax");
-			X86write("jmp", endifLabel);
-			X86write(elseLabel+" :");
-		    X86write("mov", "$1, %eax");
-			X86write(endifLabel+" :");
-			return "%eax";
+			return X86ConditionCompile("jl", children);
 		}
 		case latteParser.OP_LE: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			//X86write("if_icmple " + elseLabel, 1);
-			//X86write("iconst_0", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_1", 1);
-			//X86write(endifLabel+":");
-			break;
+			return X86ConditionCompile("jle", children);
 		}
 		case latteParser.OP_GTH: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			//X86write("if_icmpgt " + elseLabel, 1);
-			//X86write("iconst_0", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_1", 1);
-			//X86write(endifLabel+":");
-			break;
+			return X86ConditionCompile("jg", children);
 		}
 		case latteParser.OP_GE: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			//X86write("if_icmpge " + elseLabel, 1);
-			//X86write("iconst_0", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_1", 1);
-			//X86write(endifLabel+":");
-			break;
+			return X86ConditionCompile("jge", children);
 		}
 		case latteParser.OP_EQU: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			//X86write("if_icmpne " + elseLabel, 1);
-			//X86write("iconst_1", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_0", 1);
-			//X86write(endifLabel+":");
-			break;
+			return X86ConditionCompile("je", children);
 		}
 		case latteParser.OP_NE: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-			String elseLabel = X86NextLabel();
-			String endifLabel = X86NextLabel();
-			//X86write("if_icmpeq " + elseLabel, 1);
-			//X86write("iconst_1", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_0", 1);
-			//X86write(endifLabel+":");
-			break;
+			return X86ConditionCompile("jne", children);
 		}
 		case latteParser.OP_AND: {
 			X86traverse(children.get(0));
@@ -643,6 +577,26 @@ public class X86Compiler {
 		}
 
 		return null;
+	}
+
+	private String X86ConditionCompile(String condition, List<CommonTree> children) throws IOException {
+		String elseLabel = X86NextLabel();
+		String endifLabel = X86NextLabel();
+		String src = X86traverse(children.get(1));
+	    X86write("pushl", src);
+	    src = X86traverse(children.get(0));
+		if (!src.startsWith("%eax")) {
+		    X86write("mov", src+", %eax");
+		}
+	    X86write("popl", "%ecx");
+		X86write("cmp", "%ecx, %eax");
+		X86write(condition, elseLabel);
+	    X86write("mov", "$0, %eax");
+		X86write("jmp", endifLabel);
+		X86write(elseLabel+" :");
+	    X86write("mov", "$1, %eax");
+		X86write(endifLabel+" :");
+		return "%eax";
 	}
 
 	private String X86CheckPlusOpType(CommonTree node) {
