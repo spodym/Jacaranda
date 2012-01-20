@@ -1,7 +1,4 @@
 int main() {
-    if (true || true) { printInt(1); } else { printInt(0); }
-    if (false || true) { printInt(1); } else { printInt(0); }
-    if (true || false) { printInt(1); } else { printInt(0); }
-    if (false || false) { printInt(1); } else { printInt(0); }
+    if (!false) { printInt(1); } else { printInt(0); }
     return 1;
 }

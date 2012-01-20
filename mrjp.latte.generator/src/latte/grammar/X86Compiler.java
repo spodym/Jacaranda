@@ -554,14 +554,18 @@ public class X86Compiler {
 		case latteParser.NOT: {
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			X86traverse(children.get(0));
-			//X86write("ifne " + elseLabel, 1);
-			//X86write("iconst_1", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_0", 1);
-			//X86write(endifLabel+":");
-			break;
+			String src = X86traverse(children.get(0));
+			if (!src.startsWith("%eax")) {
+			    X86write("mov", src+", %eax");
+			}
+			X86write("cmp", "$1, %eax");
+			X86write("je", elseLabel);
+		    X86write("mov", "$1, %eax");
+			X86write("jmp", endifLabel);
+			X86write(elseLabel+" :");
+		    X86write("mov", "$0, %eax");
+			X86write(endifLabel+" :");
+			return "%eax";
 		}
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
