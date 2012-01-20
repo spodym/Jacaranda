@@ -62,8 +62,13 @@ public class X86Compiler {
 	public void X86generate() throws IOException {
 		X86LoadFunctions();
 
-		X86write(".file	\"" + this.className + ".lat \"", 2);
-		X86write(".text", 2);
+		X86write(".file	\"" + this.className + ".lat \"", 0);
+		X86write(".text", 0);
+		X86write("", 0);
+		X86write("int_format:", 0);
+		X86write(".string \"%d\\n\"", 2);
+		X86write("", 0);
+		X86write(".global main", 2);
 		
 		X86traverse(troot);
 		
@@ -238,11 +243,11 @@ public class X86Compiler {
 				storage_var_types.push(new HashMap<String, String>());
 				@SuppressWarnings("unchecked")
 				List<CommonTree> argsList = args.getChildren();
-				int freeId = -4;
+				int freeId = 4;
 				for (int i = 0; i < argsList.size(); i++) {
 					int type = argsList.get(i).getChild(0).getType();
 					String ident = argsList.get(i).getChild(1).getText();
-					freeId = freeId - 4;
+					freeId = freeId + 4;
 					storage_vars.peek().put(ident, freeId);
 					storage_var_types.peek().put(ident, X86TypeForVar(type));
 				}
@@ -291,9 +296,9 @@ public class X86Compiler {
 				case latteParser.TYPE_BOOLEAN: {
 					if (declaration.size() == 2) {
 					    String src = X86traverse(declaration.get(1));
-					    X86write("mov", src+", -"+freeIdShift+"(%ebp)");
+					    X86write("movl", src+", "+freeIdShift+"(%ebp)");
 					} else {
-					    X86write("mov", "$0, -"+freeIdShift+"(%ebp)");
+					    X86write("movl", "$0, "+freeIdShift+"(%ebp)");
 					}
 					break;
 				}
@@ -318,6 +323,13 @@ public class X86Compiler {
 		case latteParser.EAPP: {
 			String functionName = children.get(0).getText();
 			if (functionName.compareTo("printInt") == 0) {
+				String src = X86traverse(children.get(1));
+				X86write("pusha", 2);
+				X86write("pushl", src);
+			    X86write("pushl", "$int_format");
+			    X86write("call", "	printf");
+			    X86write("add", "$8, %esp");
+			    X86write("popa", 2);
 			} else if (functionName.compareTo("printString") == 0) {
 			} else if (functionName.compareTo("readInt") == 0) {
 			} else if (functionName.compareTo("readString") == 0) {
@@ -402,14 +414,14 @@ public class X86Compiler {
 				//X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
 			} else {
 				String src1 = X86traverse(children.get(0));
-			    X86write("push", src1);
+			    X86write("pushl", src1);
 				String reg = X86traverse(children.get(1));
 				if (reg.startsWith("$")) {
 				    X86write("mov", reg+", %eax");
 				    reg = "%eax";
 				}
-			    X86write("pop", "%edx");
-			    X86write("add", "%edx, "+reg);
+			    X86write("popl", "%edx");
+			    X86write("addl", "%edx, "+reg);
 			    return reg;
 			}
 		    break;
@@ -645,7 +657,7 @@ public class X86Compiler {
 			HashMap<String, Integer> hashMap = (HashMap<String, Integer>) iterator.next();
 			freeId += hashMap.size();
 		}
-		return freeId * 4 + 4;
+		return -1 * (freeId * 4 + 4);
 	}
 		
 }
