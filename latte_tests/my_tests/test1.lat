@@ -2,9 +2,9 @@ int main() {
     int a = foo(39, 0);
     int b = bar();
     printInt(a + b);
-    a = -111;
-    a--;
-    printInt(a);
+    a = 10;
+    b = 1;
+    printInt(a * -10);
     return a + b;
 }
 

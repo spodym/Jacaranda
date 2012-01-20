@@ -413,10 +413,10 @@ public class X86Compiler {
 				//X86write("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
 				//X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
 			} else {
-				String src1 = X86traverse(children.get(0));
+				String src1 = X86traverse(children.get(1));
 			    X86write("pushl", src1);
-				String reg = X86traverse(children.get(1));
-				if (reg.startsWith("$")) {
+				String reg = X86traverse(children.get(0));
+				if (!reg.startsWith("%")) {
 				    X86write("mov", reg+", %eax");
 				    reg = "%eax";
 				}
@@ -427,16 +427,27 @@ public class X86Compiler {
 		    break;
 		}
 		case latteParser.OP_MINUS: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-		    //X86write("isub", 1);
-		    break;
+			String src1 = X86traverse(children.get(1));
+		    X86write("pushl", src1);
+			String reg = X86traverse(children.get(0));
+			if (!reg.startsWith("%")) {
+			    X86write("mov", reg+", %eax");
+			    reg = "%eax";
+			}
+		    X86write("popl", "%edx");
+		    X86write("subl", "%edx, "+reg);
+		    return reg;
 		}
 		case latteParser.OP_TIMES: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-		    //X86write("imul", 1);
-		    break;
+			String src1 = X86traverse(children.get(1));
+		    X86write("pushl", src1);
+			String reg = X86traverse(children.get(0));
+			if (!reg.startsWith("%eax")) {
+			    X86write("mov", reg+", %eax");
+			}
+		    X86write("popl", "%edx");
+		    X86write("imul", "%edx");
+		    return "%eax";
 		}
 		case latteParser.OP_DIV: {
 			X86traverse(children.get(0));
