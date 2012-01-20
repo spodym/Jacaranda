@@ -374,11 +374,11 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.ASS: {
-			X86traverse(children.get(1));
+			String src = X86traverse(children.get(1));
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
 			String type = X86GetVarType(idName);
-			//X86write(type + "store " + idNo, 1);
+			X86write("mov"+type, src+", "+idNo+"(%ebp)");
 			break;
 		}
 		case latteParser.DECR: {
@@ -635,11 +635,11 @@ public class X86Compiler {
 	private String X86TypeForVar(int varType) {
 		switch (varType) {
 		case latteParser.TYPE_STRING:
-			return "a";
+			return "STRING"; // FIXME
 		case latteParser.TYPE_VOID:
 			return "";
 		default:
-			return "i";
+			return "l";
 		}
 	}
 
