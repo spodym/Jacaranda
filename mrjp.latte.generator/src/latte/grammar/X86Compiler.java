@@ -450,16 +450,29 @@ public class X86Compiler {
 		    return "%eax";
 		}
 		case latteParser.OP_DIV: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-		    //X86write("idiv", 1);
-		    break;
+			String src1 = X86traverse(children.get(1));
+		    X86write("pushl", src1);
+			String reg = X86traverse(children.get(0));
+			if (!reg.startsWith("%eax")) {
+			    X86write("mov", reg+", %eax");
+			}
+		    X86write("popl", "%ecx");
+		    X86write("mov", "$0, %edx");
+		    X86write("idiv", "%ecx");
+		    return "%eax";
 		}
 		case latteParser.OP_MOD: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
-		    //X86write("irem", 1);
-			break;
+			String src1 = X86traverse(children.get(1));
+		    X86write("pushl", src1);
+			String reg = X86traverse(children.get(0));
+			if (!reg.startsWith("%eax")) {
+			    X86write("mov", reg+", %eax");
+			}
+		    X86write("popl", "%ecx");
+		    X86write("mov", "$0, %edx");
+		    X86write("idiv", "%ecx");
+		    X86write("mov", "%edx, %eax");
+		    return "%eax";
 		}
 		case latteParser.OP_LTH: {
 			X86traverse(children.get(0));
