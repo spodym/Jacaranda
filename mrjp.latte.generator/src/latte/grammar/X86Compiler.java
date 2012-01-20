@@ -67,6 +67,10 @@ public class X86Compiler {
 		X86write("", 0);
 		X86write("int_format:", 0);
 		X86write(".string \"%d\\n\"", 2);
+		X86write("int_read:", 0);
+		X86write(".string \"%d\"", 2);
+		X86write("str_format:", 0);
+		X86write(".string \"%s\\n\"", 2);
 		X86write("", 0);
 		X86write(".global main", 2);
 		
@@ -327,11 +331,18 @@ public class X86Compiler {
 				X86write("pusha", 2);
 				X86write("pushl", src);
 			    X86write("pushl", "$int_format");
-			    X86write("call", "	printf");
+			    X86write("call", "printf");
 			    X86write("add", "$8, %esp");
 			    X86write("popa", 2);
 			} else if (functionName.compareTo("printString") == 0) {
 			} else if (functionName.compareTo("readInt") == 0) {
+				X86write("pushl", "$0");
+				X86write("leal", "(%esp), %eax");
+				X86write("pushl", "%eax");
+			    X86write("pushl", "$int_read");
+			    X86write("call", "scanf");
+			    X86write("add", "$8, %esp");
+			    X86write("pop", "%eax");
 			} else if (functionName.compareTo("readString") == 0) {
 			} else {
 				for (int i = children.size() - 1; i > 0; --i) {

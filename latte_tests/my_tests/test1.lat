@@ -1,4 +1,5 @@
 int main() {
-    if (!false) { printInt(1); } else { printInt(0); }
-    return 1;
+    int i = readInt();
+    printInt(i);
+    return i;
 }
