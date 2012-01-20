@@ -384,13 +384,13 @@ public class X86Compiler {
 		case latteParser.DECR: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-		    //X86write("iinc " + idNo + " -1", 1);
+			X86write("subl", "$1, "+idNo+"(%ebp)");
 			break;
 		}
 		case latteParser.INCR: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-		    //X86write("iinc " + idNo + " 1", 1);
+			X86write("addl", "$1, "+idNo+"(%ebp)");
 			break;
 		}
 		case latteParser.RET: {

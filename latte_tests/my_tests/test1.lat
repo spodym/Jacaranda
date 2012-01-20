@@ -2,7 +2,8 @@ int main() {
     int a = foo(39, 0);
     int b = bar();
     printInt(a + b);
-    a = 111;
+    a = -111;
+    a--;
     printInt(a);
     return a + b;
 }
