@@ -1,13 +1,11 @@
 int main() {
     int a = foo(39, 0);
     int b = bar();
-    printInt(a + b);
-    printInt(5 / 2);
-    printInt(4 / 2);
-    printInt(3 / 2);
-    printInt(5 % 2);
-    printInt(4 % 2);
-    printInt(3 % 2);
+    if (true) {
+        printInt(a + b);
+    } else {
+        printInt(1234);
+    }
     return a + b;
 }
 

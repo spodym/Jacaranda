@@ -203,7 +203,7 @@ public class X86Compiler {
 
 	private String X86NextLabel() {
 		labelCounter++;
-		return "Label"+labelCounter;
+		return "_Label_"+labelCounter;
 	}
 
 	private String X86traverse(CommonTree tree) throws IOException {
@@ -346,19 +346,23 @@ public class X86Compiler {
 			if (children.size() == 3) {
 				String elseLabel = X86NextLabel();
 				String endifLabel = X86NextLabel();
-				X86traverse(children.get(0));
-				//X86write("ifeq " + elseLabel, 1);
+				String src = X86traverse(children.get(0));
+				X86write("mov", src+", %eax");
+				X86write("cmp", "$1, %eax");
+				X86write("jne", elseLabel);
 				X86traverse(children.get(1));
-				//X86write("goto " + endifLabel, 1);
-				//X86write(elseLabel+":");
+				X86write("jmp", endifLabel);
+				X86write(elseLabel+" :");
 				X86traverse(children.get(2));
-				//X86write(endifLabel+":");
+				X86write(endifLabel+" :");
 			} else {
 				String endifLabel = X86NextLabel();
-				X86traverse(children.get(0));
-				//X86write("ifeq " + endifLabel, 1);
+				String src = X86traverse(children.get(0));
+				X86write("mov", src+", %eax");
+				X86write("cmp", "$1, %eax");
+				X86write("jne", endifLabel);
 				X86traverse(children.get(1));
-				//X86write(endifLabel+":");
+				X86write(endifLabel+" :");
 			}
 			break;
 		}
@@ -602,7 +606,7 @@ public class X86Compiler {
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-			String type = X86GetVarType(idName);
+			//String type = X86GetVarType(idName);
 			return idNo+"(%ebp)";
 		}
 		case latteParser.INTEGER: {
