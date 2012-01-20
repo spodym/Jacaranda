@@ -10,5 +10,5 @@ int foo(int a, int b) {
 }
 
 int bar() {
-    return 2;
+    return -84;
 }

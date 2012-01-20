@@ -555,9 +555,13 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.NEGATION: {
-			X86traverse(children.get(0));
-		    //X86write("ineg", 1);
-		    break;
+			String src = X86traverse(children.get(0));
+			if (!src.startsWith("%")) {
+				X86write("mov", src+", %edx");
+				src = "%edx";
+			}
+			X86write("neg", src);
+			return src;
 		}
 		case latteParser.NOT: {
 			String elseLabel = X86NextLabel();
@@ -581,12 +585,10 @@ public class X86Compiler {
 			return "$"+tree.getText();
 		}
 		case latteParser.FALSE: {
-			//X86write("ldc 0", 1);
-			break;
+			return "$0";
 		}
 		case latteParser.TRUE: {
-			//X86write("ldc 1", 1);
-			break;
+			return "$1";
 		}
 		case latteParser.STRING: {
 			//X86write("ldc " + tree.getText(), 1);
