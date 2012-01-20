@@ -1,16 +1,8 @@
 int main() {
-    int a = foo(39, 0);
-    int b = bar();
-    while (false) {
-        printInt(a + b);
+    int i = 10;
+    while (0 < i) {
+        i--;
+        printInt(i);
     }
-    return a + b;
-}
-
-int foo(int a, int b) {
-    return a + 1;
-}
-
-int bar() {
-    return -84;
+    return 1;
 }

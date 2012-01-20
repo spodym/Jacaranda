@@ -481,17 +481,23 @@ public class X86Compiler {
 		    return "%eax";
 		}
 		case latteParser.OP_LTH: {
-			X86traverse(children.get(0));
-			X86traverse(children.get(1));
 			String elseLabel = X86NextLabel();
 			String endifLabel = X86NextLabel();
-			//X86write("if_icmplt " + elseLabel, 1);
-			//X86write("iconst_0", 1);
-			//X86write("goto " + endifLabel, 1);
-			//X86write(elseLabel+":");
-			//X86write("iconst_1", 1);
-			//X86write(endifLabel+":");
-			break;
+			String src = X86traverse(children.get(1));
+		    X86write("pushl", src);
+		    src = X86traverse(children.get(0));
+			if (!src.startsWith("%eax")) {
+			    X86write("mov", src+", %eax");
+			}
+		    X86write("popl", "%ecx");
+			X86write("cmp", "%ecx, %eax");
+			X86write("jl", elseLabel);
+		    X86write("mov", "$0, %eax");
+			X86write("jmp", endifLabel);
+			X86write(elseLabel+" :");
+		    X86write("mov", "$1, %eax");
+			X86write(endifLabel+" :");
+			return "%eax";
 		}
 		case latteParser.OP_LE: {
 			X86traverse(children.get(0));
