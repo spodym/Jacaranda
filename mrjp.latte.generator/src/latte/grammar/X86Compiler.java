@@ -94,63 +94,63 @@ public class X86Compiler {
 
 	private void X86writeAux() throws IOException {
 		X86write("",0);
-		X86write(".globl	concat");
+		X86write(".globl concat", 2);
 		X86write("concat:", 0);
 		X86write("push","%ebp");
 		X86write("mov", "%esp, %ebp");
-		X86write("pushl	%edi");
-		X86write("subl	$52, %esp");
-		X86write("movl	8(%ebp), %eax");
-		X86write("movl	$-1, -28(%ebp)");
-		X86write("movl	%eax, %edx");
-		X86write("movl	$0, %eax");
-		X86write("movl	-28(%ebp), %ecx");
-		X86write("movl	%edx, %edi");
-		X86write("repnz scasb");
-		X86write("movl	%ecx, %eax");
-		X86write("notl	%eax");
-		X86write("subl	$1, %eax");
-		X86write("movl	%eax, -20(%ebp)");
-		X86write("movl	12(%ebp), %eax");
-		X86write("movl	$-1, -28(%ebp)");
-		X86write("movl	%eax, %edx");
-		X86write("movl	$0, %eax");
-		X86write("movl	-28(%ebp), %ecx");
-		X86write("movl	%edx, %edi");
-		X86write("repnz scasb");
-		X86write("movl	%ecx, %eax");
-		X86write("notl	%eax");
-		X86write("subl	$1, %eax");
-		X86write("movl	%eax, -16(%ebp)");
-		X86write("movl	-16(%ebp), %eax");
-		X86write("movl	-20(%ebp), %edx");
-		X86write("addl	%edx, %eax");
-		X86write("addl	$1, %eax");
-		X86write("movl	%eax, (%esp)");
-		X86write("call	malloc");
-		X86write("movl	%eax, -12(%ebp)");
-		X86write("movl	-12(%ebp), %eax");
-		X86write("movl	8(%ebp), %edx");
-		X86write("movl	-20(%ebp), %ecx");
-		X86write("movl	%ecx, 8(%esp)");
-		X86write("movl	%edx, 4(%esp)");
-		X86write("movl	%eax, (%esp)");
-		X86write("call	memcpy");
-		X86write("movl	-16(%ebp), %eax");
-		X86write("leal	1(%eax), %ecx");
-		X86write("movl	-20(%ebp), %eax");
-		X86write("movl	-12(%ebp), %edx");
-		X86write("addl	%edx, %eax");
-		X86write("movl	12(%ebp), %edx");
-		X86write("movl	%ecx, 8(%esp)");
-		X86write("movl	%edx, 4(%esp)");
-		X86write("movl	%eax, (%esp)");
-		X86write("call	memcpy");
-		X86write("movl	-12(%ebp), %eax");
-		X86write("addl	$52, %esp");
-		X86write("popl	%edi");
-		X86write("popl	%ebp");
-		X86write("ret");
+		X86write("pushl", "%edi");
+		X86write("subl", "$52, %esp");
+		X86write("movl", "8(%ebp), %eax");
+		X86write("movl", "$-1, -28(%ebp)");
+		X86write("movl", "%eax, %edx");
+		X86write("movl", "$0, %eax");
+		X86write("movl", "-28(%ebp), %ecx");
+		X86write("movl", "%edx, %edi");
+		X86write("repnz", "scasb");
+		X86write("movl", "%ecx, %eax");
+		X86write("notl", "%eax");
+		X86write("subl", "$1, %eax");
+		X86write("movl", "%eax, -20(%ebp)");
+		X86write("movl", "12(%ebp), %eax");
+		X86write("movl", "$-1, -28(%ebp)");
+		X86write("movl", "%eax, %edx");
+		X86write("movl", "$0, %eax");
+		X86write("movl", "-28(%ebp), %ecx");
+		X86write("movl", "%edx, %edi");
+		X86write("repnz", "scasb");
+		X86write("movl", "%ecx, %eax");
+		X86write("notl", "%eax");
+		X86write("subl", "$1, %eax");
+		X86write("movl", "%eax, -16(%ebp)");
+		X86write("movl", "-16(%ebp), %eax");
+		X86write("movl", "-20(%ebp), %edx");
+		X86write("addl", "%edx, %eax");
+		X86write("addl", "$1, %eax");
+		X86write("movl", "%eax, (%esp)");
+		X86write("call", "malloc");
+		X86write("movl", "%eax, -12(%ebp)");
+		X86write("movl", "-12(%ebp), %eax");
+		X86write("movl", "8(%ebp), %edx");
+		X86write("movl", "-20(%ebp), %ecx");
+		X86write("movl", "%ecx, 8(%esp)");
+		X86write("movl", "%edx, 4(%esp)");
+		X86write("movl", "%eax, (%esp)");
+		X86write("call", "memcpy");
+		X86write("movl", "-16(%ebp), %eax");
+		X86write("leal", "1(%eax), %ecx");
+		X86write("movl", "-20(%ebp), %eax");
+		X86write("movl", "-12(%ebp), %edx");
+		X86write("addl", "%edx, %eax");
+		X86write("movl", "12(%ebp), %edx");
+		X86write("movl", "%ecx, 8(%esp)");
+		X86write("movl", "%edx, 4(%esp)");
+		X86write("movl", "%eax, (%esp)");
+		X86write("call", "memcpy");
+		X86write("movl", "-12(%ebp), %eax");
+		X86write("addl", "$52, %esp");
+		X86write("popl", "%edi");
+		X86write("popl", "%ebp");
+		X86write("ret", 2);
 	}
 
 	private void X86LoadFunctions() {
@@ -531,6 +531,10 @@ public class X86Compiler {
 			String src = X86traverse(children.get(1));
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
+			if (src.contains("%ebp")) {
+				X86write("movl", src+", %eax");
+				src = "%eax";
+			}
 			X86write("movl", src+", "+idNo+"(%ebp)");
 			break;
 		}
@@ -754,15 +758,15 @@ public class X86Compiler {
 	    X86write("pushl", src);
 	    src = X86traverse(children.get(0));
 		if (!src.startsWith("%eax")) {
-		    X86write("mov", src+", %eax");
+		    X86write("movl", src+", %eax");
 		}
 	    X86write("popl", "%ecx");
 		X86write("cmp", "%ecx, %eax");
 		X86write(condition, elseLabel);
-	    X86write("mov", "$0, %eax");
+	    X86write("movl", "$0, %eax");
 		X86write("jmp", endifLabel);
 		X86write(elseLabel+" :");
-	    X86write("mov", "$1, %eax");
+	    X86write("movl", "$1, %eax");
 		X86write(endifLabel+" :");
 		return "%eax";
 	}
@@ -817,7 +821,7 @@ public class X86Compiler {
 			HashMap<String, Integer> hashMap = (HashMap<String, Integer>) iterator.next();
 			freeId += hashMap.size();
 		}
-		return -1 * (freeId * 4 + 4);
+		return -1 * (freeId * 4);
 	}
 		
 }
