@@ -335,6 +335,13 @@ public class X86Compiler {
 			    X86write("add", "$8, %esp");
 			    X86write("popa", 2);
 			} else if (functionName.compareTo("printString") == 0) {
+				String src = X86traverse(children.get(1));
+				X86write("pusha", 2);
+				X86write("pushl", src);
+			    X86write("pushl", "$str_format");
+			    X86write("call", "printf");
+			    X86write("add", "$8, %esp");
+			    X86write("popa", 2);
 			} else if (functionName.compareTo("readInt") == 0) {
 				X86write("pushl", "$0");
 				X86write("leal", "(%esp), %eax");
@@ -344,6 +351,45 @@ public class X86Compiler {
 			    X86write("add", "$8, %esp");
 			    X86write("pop", "%eax");
 			} else if (functionName.compareTo("readString") == 0) {
+				X86write("pushl", "$0"); // pointer to string
+				X86write("leal", "(%esp), %edx"); // make pointer to pointer
+				X86write("pushl", "$8"); // no of bytes to read
+				X86write("leal", "(%esp), %ecx"); // pointer to no of bytes
+				X86write("movl", "stdin, %eax"); // descriptor
+				X86write("pushl", "%eax");
+				X86write("pushl", "%ecx");
+				X86write("pushl", "%edx");
+			    X86write("call", "getline");
+			    X86write("add", "$16, %esp");
+
+			    X86write("pop", "%eax");
+				X86write("pushl", "%eax"); // eax holds string
+
+				X86write("movl", "%eax, %edx");
+				X86write("movl", "$0, %eax");
+				X86write("movl", "$-1, %ecx");
+				X86write("movl", "%edx, %edi");
+				X86write("repnz", "scasb");
+				X86write("movl", "%ecx, %eax");
+				X86write("notl", "%eax");
+				X86write("subl", "$1, %eax"); // eax holds string length
+
+				X86write("movl", "%eax, %edx"); // edx holds string length
+			    X86write("pop", "%eax");
+				X86write("pushl", "%eax"); // eax holds string
+
+				X86write("addl", "%edx, %eax");
+				X86write("movzbl", "(%eax), %eax");
+				X86write("cmpb", "$10, %al");
+				String endifLabel = X86NextLabel();
+				//X86write("jne", endifLabel); // FIXME
+			    X86write("pop", "%eax");
+				X86write("pushl", "%eax"); // eax holds string
+				X86write("subl", "$1, %edx");
+				X86write("addl", "%edx, %eax");
+				X86write("movb", "$0, (%eax)");
+				X86write(endifLabel+" :");
+			    X86write("pop", "%eax");
 			} else {
 				for (int i = children.size() - 1; i > 0; --i) {
 					String src = X86traverse(children.get(i));
