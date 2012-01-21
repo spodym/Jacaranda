@@ -20,6 +20,8 @@ public class X86Compiler {
 	private int labelCounter;
 	private String currentReturnType;
 	private String className;
+	private String compiledStart = "";
+	private String compiledEnd = "";
 	private CommonTree troot;
 	FileWriter fwriter;
 	BufferedWriter output;
@@ -44,7 +46,15 @@ public class X86Compiler {
 		for (int i = 0; i < indentionLevel; i++) {
 			indention = indention.concat("    ");
 		}
-		output.write(indention + out + "\r\n");
+		compiledEnd = compiledEnd.concat(indention + out + "\r\n");
+	}
+
+	private void X86preWrite(String out, int indentionLevel) {
+		String indention = "";
+		for (int i = 0; i < indentionLevel; i++) {
+			indention = indention.concat("    ");
+		}
+		compiledStart = compiledStart.concat(indention + out + "\r\n");
 	}
 
 	private void X86write(String out) throws IOException {
@@ -56,21 +66,24 @@ public class X86Compiler {
 	}
 
 	private void X86writeEnd() throws IOException {
+		output.write(compiledStart);
+		output.write(compiledEnd);
 		output.close();
 	}
 
 	public void X86generate() throws IOException {
 		X86LoadFunctions();
 
-		X86write(".file	\"" + this.className + ".lat \"", 0);
-		X86write(".text", 0);
+		X86preWrite(".file	\"" + this.className + ".lat \"", 0);
+		X86preWrite(".text", 0);
+		X86preWrite("", 0);
+		X86preWrite("int_format:", 0);
+		X86preWrite(".string \"%d\\n\"", 2);
+		X86preWrite("int_read:", 0);
+		X86preWrite(".string \"%d\"", 2);
+		X86preWrite("str_format:", 0);
+		X86preWrite(".string \"%s\\n\"", 2);
 		X86write("", 0);
-		X86write("int_format:", 0);
-		X86write(".string \"%d\\n\"", 2);
-		X86write("int_read:", 0);
-		X86write(".string \"%d\"", 2);
-		X86write("str_format:", 0);
-		X86write(".string \"%s\\n\"", 2);
 		X86write("", 0);
 		X86write(".global main", 2);
 		
@@ -470,14 +483,9 @@ public class X86Compiler {
 		case latteParser.OP_PLUS: {
 			String type = X86CheckPlusOpType(children.get(0));
 			if (type.compareTo("a") == 0) {
-				//X86write("new java/lang/StringBuilder", 1);
-				//X86write("dup", 1);
-				//X86write("invokespecial java/lang/StringBuilder/<init>()V", 1);
+				// TODO:
 				X86traverse(children.get(0));
-				//X86write("invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
 				X86traverse(children.get(1));
-				//X86write("invokevirtual	java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;", 1);
-				//X86write("invokevirtual	java/lang/StringBuilder/toString()Ljava/lang/String;", 1);
 			} else {
 				String src1 = X86traverse(children.get(1));
 			    X86write("pushl", src1);
@@ -630,7 +638,6 @@ public class X86Compiler {
 		case latteParser.VAR_IDENT: {
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-			//String type = X86GetVarType(idName);
 			return idNo+"(%ebp)";
 		}
 		case latteParser.INTEGER: {
@@ -643,8 +650,10 @@ public class X86Compiler {
 			return "$1";
 		}
 		case latteParser.STRING: {
-			//X86write("ldc " + tree.getText(), 1);
-			break;
+			String str_label = X86NextLabel();
+			X86preWrite(str_label+":", 0);
+			X86preWrite(".string "+tree.getText(), 2);
+			return "$"+str_label;
 		}
 		default: {
 			if (children != null) {
@@ -707,7 +716,7 @@ public class X86Compiler {
 	private String X86TypeForVar(int varType) {
 		switch (varType) {
 		case latteParser.TYPE_STRING:
-			return "STRING"; // FIXME
+			return "l"; // TODO: check!
 		case latteParser.TYPE_VOID:
 			return "";
 		default:

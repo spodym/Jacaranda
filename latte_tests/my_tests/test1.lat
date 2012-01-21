@@ -1,5 +1,5 @@
 int main() {
-    string s;// = readString();
+    string s = "asd";
     printString(s);
     return 1;
 }
