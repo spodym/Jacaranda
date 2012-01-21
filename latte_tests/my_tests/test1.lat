@@ -1,6 +1,15 @@
 int main() {
-    string s = "asd";
-    string t = "qwe";
-    printString("a" + "a");
+    string s, t;
+    s = foo(1);
+    t = "b";
+    printString(s + " " + t);
     return 1;
+}
+
+string foo(int i) {
+    return "foo";
+}
+
+string bar() {
+    return "bar";
 }

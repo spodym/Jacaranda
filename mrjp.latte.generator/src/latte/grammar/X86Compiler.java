@@ -483,6 +483,10 @@ public class X86Compiler {
 				} else {
 					X86write("call", "__"+functionName);
 				}
+				int argsCount = children.size() - 1;
+				if (argsCount != 0) {
+					X86write("add", "$"+argsCount*4+", %esp");
+				}
 			}
 			return "%eax";
 		}
@@ -527,8 +531,7 @@ public class X86Compiler {
 			String src = X86traverse(children.get(1));
 			String idName = children.get(0).getText();
 			int idNo = X86VarToId(idName);
-			String type = X86GetVarType(idName);
-			X86write("mov"+type, src+", "+idNo+"(%ebp)");
+			X86write("movl", src+", "+idNo+"(%ebp)");
 			break;
 		}
 		case latteParser.DECR: {
@@ -790,7 +793,7 @@ public class X86Compiler {
 	private String X86TypeForVar(int varType) {
 		switch (varType) {
 		case latteParser.TYPE_STRING:
-			return "l"; // TODO: check!
+			return "a";
 		case latteParser.TYPE_VOID:
 			return "";
 		default:
