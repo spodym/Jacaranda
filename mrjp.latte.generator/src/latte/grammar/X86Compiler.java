@@ -83,13 +83,74 @@ public class X86Compiler {
 		X86preWrite(".string \"%d\"", 2);
 		X86preWrite("str_format:", 0);
 		X86preWrite(".string \"%s\\n\"", 2);
+
 		X86write("", 0);
-		X86write("", 0);
-		X86write(".global main", 2);
-		
+
 		X86traverse(troot);
-		
+		X86writeAux();
+
 		X86writeEnd();
+	}
+
+	private void X86writeAux() throws IOException {
+		X86write("",0);
+		X86write(".globl	concat");
+		X86write("concat:", 0);
+		X86write("push","%ebp");
+		X86write("mov", "%esp, %ebp");
+		X86write("pushl	%edi");
+		X86write("subl	$52, %esp");
+		X86write("movl	8(%ebp), %eax");
+		X86write("movl	$-1, -28(%ebp)");
+		X86write("movl	%eax, %edx");
+		X86write("movl	$0, %eax");
+		X86write("movl	-28(%ebp), %ecx");
+		X86write("movl	%edx, %edi");
+		X86write("repnz scasb");
+		X86write("movl	%ecx, %eax");
+		X86write("notl	%eax");
+		X86write("subl	$1, %eax");
+		X86write("movl	%eax, -20(%ebp)");
+		X86write("movl	12(%ebp), %eax");
+		X86write("movl	$-1, -28(%ebp)");
+		X86write("movl	%eax, %edx");
+		X86write("movl	$0, %eax");
+		X86write("movl	-28(%ebp), %ecx");
+		X86write("movl	%edx, %edi");
+		X86write("repnz scasb");
+		X86write("movl	%ecx, %eax");
+		X86write("notl	%eax");
+		X86write("subl	$1, %eax");
+		X86write("movl	%eax, -16(%ebp)");
+		X86write("movl	-16(%ebp), %eax");
+		X86write("movl	-20(%ebp), %edx");
+		X86write("addl	%edx, %eax");
+		X86write("addl	$1, %eax");
+		X86write("movl	%eax, (%esp)");
+		X86write("call	malloc");
+		X86write("movl	%eax, -12(%ebp)");
+		X86write("movl	-12(%ebp), %eax");
+		X86write("movl	8(%ebp), %edx");
+		X86write("movl	-20(%ebp), %ecx");
+		X86write("movl	%ecx, 8(%esp)");
+		X86write("movl	%edx, 4(%esp)");
+		X86write("movl	%eax, (%esp)");
+		X86write("call	memcpy");
+		X86write("movl	-16(%ebp), %eax");
+		X86write("leal	1(%eax), %ecx");
+		X86write("movl	-20(%ebp), %eax");
+		X86write("movl	-12(%ebp), %edx");
+		X86write("addl	%edx, %eax");
+		X86write("movl	12(%ebp), %edx");
+		X86write("movl	%ecx, 8(%esp)");
+		X86write("movl	%edx, 4(%esp)");
+		X86write("movl	%eax, (%esp)");
+		X86write("call	memcpy");
+		X86write("movl	-12(%ebp), %eax");
+		X86write("addl	$52, %esp");
+		X86write("popl	%edi");
+		X86write("popl	%ebp");
+		X86write("ret");
 	}
 
 	private void X86LoadFunctions() {
@@ -240,7 +301,13 @@ public class X86Compiler {
 
 		    X86write("");
 		    X86write("");
-		    X86write(name+":");
+			if (name.compareTo("main") == 0) {
+				X86write(".global main", 2);
+				X86write(name+":");
+			} else {
+				X86write(".global "+name, 2);
+				X86write("__"+name+":");
+			}
 
 			X86write("push","%ebp");
 			X86write("mov", "%esp, %ebp");
@@ -411,7 +478,11 @@ public class X86Compiler {
 					String src = X86traverse(children.get(i));
 					X86write("push", src);
 				}
-				X86write("call", functionName);
+				if (functionName.compareTo("main") == 0) {
+					X86write("call", functionName);
+				} else {
+					X86write("call", "__"+functionName);
+				}
 			}
 			return "%eax";
 		}
@@ -483,9 +554,13 @@ public class X86Compiler {
 		case latteParser.OP_PLUS: {
 			String type = X86CheckPlusOpType(children.get(0));
 			if (type.compareTo("a") == 0) {
-				// TODO:
-				X86traverse(children.get(0));
-				X86traverse(children.get(1));
+				String src = X86traverse(children.get(1));
+			    X86write("push", src);
+				src = X86traverse(children.get(0));
+			    X86write("push", src);
+			    X86write("call concat", 2);
+			    X86write("add", "$8, %esp");
+			    return "%eax";
 			} else {
 				String src1 = X86traverse(children.get(1));
 			    X86write("pushl", src1);
@@ -498,7 +573,6 @@ public class X86Compiler {
 			    X86write("addl", "%edx, "+reg);
 			    return reg;
 			}
-		    break;
 		}
 		case latteParser.OP_MINUS: {
 			String src1 = X86traverse(children.get(1));

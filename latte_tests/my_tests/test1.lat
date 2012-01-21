@@ -1,5 +1,6 @@
 int main() {
     string s = "asd";
-    printString(s);
+    string t = "qwe";
+    printString("a" + "a");
     return 1;
 }
