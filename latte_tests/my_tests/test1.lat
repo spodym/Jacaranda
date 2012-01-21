@@ -1,4 +1,5 @@
 int main() {
-    printString(readString());
+    string s;// = readString();
+    printString(s);
     return 1;
 }

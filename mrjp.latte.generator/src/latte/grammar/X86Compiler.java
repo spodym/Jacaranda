@@ -308,11 +308,14 @@ public class X86Compiler {
 				}
 				case latteParser.TYPE_STRING: {
 					if (declaration.size() == 2) {
-					    X86traverse(declaration.get(1));
+					    String src = X86traverse(declaration.get(1));
+					    X86write("movl", src+", "+freeIdShift+"(%ebp)");
 					} else {
-//					    X86write("ldc \"\"", 1);	
+						X86write("movl", "$1, (%esp)");
+						X86write("call", "malloc");
+						X86write("movl", "%eax, "+freeIdShift+"(%ebp)");
+						X86write("movb", "$0, (%eax)");
 					}
-//					X86write("astore " + freeIdShift, 1);
 					break;
 				}
 				default:
