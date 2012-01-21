@@ -553,9 +553,15 @@ public class X86Compiler {
 		case latteParser.RET: {
 			String src = X86traverse(children.get(0));
 		    X86write("mov", src+", %eax");
+			X86write("mov", "%ebp, %esp");
+			X86write("pop", "%ebp");
+			X86write("ret", 2);
 			break;
 		}
 		case latteParser.RETV: {
+			X86write("mov", "%ebp, %esp");
+			X86write("pop", "%ebp");
+			X86write("ret", 2);
 			break;
 		}
 		case latteParser.OP_PLUS: {
