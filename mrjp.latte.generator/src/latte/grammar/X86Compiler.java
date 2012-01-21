@@ -322,9 +322,9 @@ public class X86Compiler {
 
 		    // Traversing function body.
 		    currentReturnType = X86TypeForVar(children.get(0).getType());
+			storage_vars.push(new HashMap<String, Integer>());
+			storage_var_types.push(new HashMap<String, String>());
 			if (args.getType() == latteParser.ARGS) {
-				storage_vars.push(new HashMap<String, Integer>());
-				storage_var_types.push(new HashMap<String, String>());
 				@SuppressWarnings("unchecked")
 				List<CommonTree> argsList = args.getChildren();
 				int freeId = 4;
@@ -336,11 +336,11 @@ public class X86Compiler {
 					storage_var_types.peek().put(ident, X86TypeForVar(type));
 				}
 				X86traverse(children.get(3));
-				storage_vars.pop();
-				storage_var_types.pop();
 			} else {
 				X86traverse(children.get(2));
 			}
+			storage_vars.pop();
+			storage_var_types.pop();
 
 			X86write("mov", "%ebp, %esp");
 			if (name.compareTo("main") == 0) {
