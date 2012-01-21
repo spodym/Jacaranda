@@ -11,6 +11,7 @@ CLASSES = \
 	mrjp.latte.generator/src/latte/grammar/LatteException.java \
 	mrjp.latte.generator/src/latte/grammar/TreeBuilder.java \
 	mrjp.latte.generator/src/latte/grammar/JVMCompiler.java \
+	mrjp.latte.generator/src/latte/grammar/X86Compiler.java \
 	mrjp.latte.generator/src/jacaranda/frontend/Jacaranda.java
 
 default: jar
