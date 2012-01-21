@@ -80,7 +80,7 @@ public class X86Compiler {
 		X86preWrite("int_format:", 0);
 		X86preWrite(".string \"%d\\n\"", 2);
 		X86preWrite("int_read:", 0);
-		X86preWrite(".string \"%d\"", 2);
+		X86preWrite(".string \"%d\\n\"", 2);
 		X86preWrite("str_format:", 0);
 		X86preWrite(".string \"%s\\n\"", 2);
 
