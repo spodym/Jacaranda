@@ -817,11 +817,11 @@ public class X86Compiler {
 
 	private int X86FreeVarId(Stack<HashMap<String, Integer>> vars) {
 		int freeId = 0;
-		for (Iterator<HashMap<String, Integer>> iterator = vars.iterator(); iterator.hasNext();) {
-			HashMap<String, Integer> hashMap = (HashMap<String, Integer>) iterator.next();
-			freeId += hashMap.size();
+		for(int i = vars.size()-1; i >= 1; i--) {
+			HashMap<String, Integer> locVar = vars.get(i);
+			freeId += locVar.size();
 		}
-		return -1 * (freeId * 4);
+		return -1 * (freeId * 4 + 4);
 	}
 		
 }
