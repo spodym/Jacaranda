@@ -18,7 +18,6 @@ public class X86Compiler {
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
 	private Stack<HashMap<String, String>> storage_var_types = new Stack<HashMap<String,String>>();
 	private int labelCounter;
-	private String currentReturnType;
 	private String className;
 	private String compiledStart = "";
 	private String compiledEnd = "";
@@ -234,7 +233,7 @@ public class X86Compiler {
 			return max_count + bytes;
 		}
 		case latteParser.DECL: {
-			int varType = children.get(0).token.getType(); // TODO: for byte count
+			//int varType = children.get(0).token.getType(); // TODO: for byte count
 			for(int i = 1; i < children.size(); i++) {
 				CommonTree child = children.get(i);
 				@SuppressWarnings("unchecked")
@@ -320,8 +319,7 @@ public class X86Compiler {
 				X86write("sub", "$"+max_bytes_for_locals+",%esp");
 			}
 
-		    // Traversing function body.
-		    currentReturnType = X86TypeForVar(children.get(0).getType());
+		    X86TypeForVar(children.get(0).getType());
 			storage_vars.push(new HashMap<String, Integer>());
 			storage_var_types.push(new HashMap<String, String>());
 			if (args.getType() == latteParser.ARGS) {

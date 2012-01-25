@@ -15,12 +15,23 @@ I. First iteration of project:
     It performs function types checking, types checking & return statements
     checking.
 
-II. Second iteration of project: SOON
-III. Third iteration of project: SOON
+II. Second iteration of project:
+1. Compiler for JVM
+
+III. Third iteration of project:
+
+1. Compiler for x86
+
+2. Optimizations
+    - calculating exact space in frame for variables
+    - inlining functions
+
+3. Addons
+    - arrays
 
 How to run?
 $ make
-$ java -jar Jacaranda.jar path_to_latte_file.lat
+$ ./latte.sh path_to_latte_file.lat
 $ # here we get eventuall errors if analyss went wrong
 $ # othervise output is clean
 

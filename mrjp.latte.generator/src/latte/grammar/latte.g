@@ -1,6 +1,7 @@
 grammar latte;
 
 options {
+    backtrack=true;
     language = Java;
     output=AST;
     ASTLabelType=CommonTree;
@@ -21,6 +22,7 @@ tokens {
     RETV;
     COND;
     SWHILE;
+    SFOR;
     
     EAPP;
     EMUL;
@@ -39,6 +41,12 @@ tokens {
     TYPE_STRING;
     TYPE_BOOLEAN;
     TYPE_VOID;
+    
+    ARRTYPE;
+    NEWARR;
+    SUBSCRIB;
+    
+    ATTRIBUTE;
 }
 
 @header {
@@ -81,6 +89,7 @@ stmt
     | vret
     | cond
     | swhile
+    | sfor
     | sexp
     ;
 empty
@@ -103,7 +112,7 @@ init
     : ident lc='=' expr -> ^(INIT[$lc, "INIT"] ident expr)
     ;
 ass
-    : ident lc='=' expr  ';' -> ^(ASS[$lc, "ASS"] ident expr)
+    : assignable lc='=' expr  ';' -> ^(ASS[$lc, "ASS"] assignable expr)
     ;
 incr
     : ident lc='++'  ';' -> ^(INCR[$lc, "INCR"] ident)
@@ -123,6 +132,9 @@ cond
 swhile
     : lc='while' '(' expr ')' stmt -> ^(SWHILE[$lc, "SWHILE"] expr stmt)
     ;
+sfor
+    : lc='for' '(' type2 noinit ':' ident ')' stmt -> ^(SFOR[$lc, "SFOR"] ^(DECL type2 noinit) ident stmt)
+    ;
 sexp
     : expr ';'!
     ;
@@ -131,23 +143,47 @@ sexp
 /** types */
 
 type
+    : type2
+    | arrtype
+    ;
+
+type2
     : 'int' -> TYPE_INT
     | 'string' -> TYPE_STRING
     | 'boolean' -> TYPE_BOOLEAN
     | 'void' -> TYPE_VOID
+    ;
+    
+arrtype
+    : type2 '[]' ->  ^(ARRTYPE type2)
     ;
 
 
 /** expressions */
 
 atom
-    : evar
+    : newarr
+    | assignable
+    | attribute
     | elitint
     | lc='true' -> TRUE[$lc,"TRUE"]
     | lc='false' -> FALSE[$lc,"FALSE"]
     | eapp
     | estring
     | '(' expr ')' -> expr
+    ;
+assignable
+    : subscrib
+    | evar
+    ;
+subscrib
+    : evar '[' expr ']' -> ^(SUBSCRIB evar expr)
+    ;
+attribute
+    : evar '.' ident -> ^(ATTRIBUTE evar ident)
+    ;
+newarr
+    : 'new' type2 '[' expr ']' -> ^(NEWARR type2 expr)
     ;
 evar
     : ident -> ^(VAR_IDENT ident)
