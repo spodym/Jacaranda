@@ -84,6 +84,8 @@ public class X86Compiler {
 		X86preWrite(".string \"%d\"", 2);
 		X86preWrite("str_format:", 0);
 		X86preWrite(".string \"%s\\n\"", 2);
+		X86preWrite("error:", 0);
+		X86preWrite(".string \"runtime error\"", 2);
 
 		X86write("", 0);
 
@@ -462,6 +464,14 @@ public class X86Compiler {
 			    X86write("add", "$8, %esp");
 			    X86write("popa", 2);
 			} else if (functionName.compareTo("error") == 0) {
+				X86write("pusha", 2);
+				X86write("pushl", "$error");
+			    X86write("pushl", "$str_format");
+			    X86write("call", "printf");
+			    X86write("add", "$8, %esp");
+			    X86write("popa", 2);
+			    X86write("movl", "$1, (%esp)");
+			    X86write("call", "exit");
 			} else if (functionName.compareTo("readInt") == 0) {
 				X86write("pushl", "$0");
 				X86write("leal", "(%esp), %eax");
