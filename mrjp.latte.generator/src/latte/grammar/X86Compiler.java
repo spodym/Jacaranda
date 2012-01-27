@@ -81,7 +81,7 @@ public class X86Compiler {
 		X86preWrite("int_format:", 0);
 		X86preWrite(".string \"%d\\n\"", 2);
 		X86preWrite("int_read:", 0);
-		X86preWrite(".string \"%d\\n\"", 2);
+		X86preWrite(".string \"%d\"", 2);
 		X86preWrite("str_format:", 0);
 		X86preWrite(".string \"%s\\n\"", 2);
 
@@ -461,14 +461,15 @@ public class X86Compiler {
 			    X86write("call", "printf");
 			    X86write("add", "$8, %esp");
 			    X86write("popa", 2);
+			} else if (functionName.compareTo("error") == 0) {
 			} else if (functionName.compareTo("readInt") == 0) {
 				X86write("pushl", "$0");
 				X86write("leal", "(%esp), %eax");
 				X86write("pushl", "%eax");
 			    X86write("pushl", "$int_read");
 			    X86write("call", "scanf");
-			    X86write("add", "$8, %esp");
-			    X86write("pop", "%eax");
+			    X86write("addl", "$8, %esp");
+			    X86write("popl", "%eax");
 			} else if (functionName.compareTo("readString") == 0) {
 				X86write("pushl", "$0"); // pointer to string
 				X86write("leal", "(%esp), %edx"); // make pointer to pointer
@@ -910,10 +911,17 @@ public class X86Compiler {
 		if (node.getType() == latteParser.VAR_IDENT) {
 			String idName = node.getChild(0).getText();
 			type = X86GetVarType(idName);
+		} else if (node.getType() == latteParser.EAPP) {
+			String functionName = node.getChild(0).getText();
+			type = storage_func.get(functionName);
 		} else if (node.getType() == latteParser.STRING) {
 			type = "a";
 		} else if (node.getType() == latteParser.OP_PLUS) {
 			type = X86CheckPlusOpType((CommonTree)node.getChild(0));
+		}
+		
+		if (type.contains("String;")) {
+			type = "a";
 		}
 		return type;
 	}
