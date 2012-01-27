@@ -18,6 +18,7 @@ public class TreeBuilder {
 
 	private HashMap<String, CommonTree> storage_func = new HashMap<String, CommonTree>();
 	private Stack<HashMap<String, Integer>> storage_vars = new Stack<HashMap<String,Integer>>();
+	private Stack<HashMap<String, Integer>> storage_subs = new Stack<HashMap<String,Integer>>();
 	
 	public CommonTree buildTree(String program_data) throws RecognitionException {
 		CharStream charStream = new ANTLRStringStream(program_data);
@@ -300,6 +301,16 @@ public class TreeBuilder {
 		}
 		return -1;
 	}
+	
+	private int lookupSubs(String ident) {
+		for(int i = storage_subs.size()-1; i >= 0; i--) {
+			HashMap<String,Integer> locVar = storage_subs.get(i);
+			if (locVar.containsKey(ident)) {
+				return locVar.get(ident);
+			}
+		}
+		return -1;
+	}
 
 	private boolean lookupFun(String funName) {
 		return storage_func.containsKey(funName);
@@ -445,7 +456,7 @@ public class TreeBuilder {
 			if (funName.compareTo("readInt") == 0) { 
 				return checkReadInt(children); 
 			}
-			
+
 			CommonTree func = storage_func.get(funName);
 			CommonTree args = (CommonTree)func.getChildren().get(2);
 
@@ -473,8 +484,19 @@ public class TreeBuilder {
 		}
 		
 		case latteParser.ASS: {
-			int type = lookupVar(children.get(0).token.getText());
-			if (type != -1) {
+			int type = lookupVar(children.get(0).getChild(0).getText());
+			int subs = children.get(0).getType();
+			if (type == -1) {
+				type = lookupVar(children.get(0).getChild(0).getChild(0).getText());
+			}
+			if (type == latteParser.ARRTYPE && subs == latteParser.SUBSCRIB) {
+				int currType = checkTypes(children.get(1));
+				type = lookupSubs(children.get(0).getChild(0).getChild(0).getText());
+				if (type != currType) {
+					throw new LatteException("Type mismatch in assignment. Expected: "+typeToString(type)+
+							", given: "+typeToString(currType)+".", children.get(0));
+				}
+			} else if (type != -1) {
 				int currType = checkTypes(children.get(1));
 				if (type != currType) {
 					throw new LatteException("Type mismatch in assignment. Expected: "+typeToString(type)+
@@ -504,6 +526,7 @@ public class TreeBuilder {
 			if (children != null) {
 				// new block vars
 				storage_vars.push(new HashMap<String, Integer>());
+				storage_subs.push(new HashMap<String, Integer>());
 	
 				// iterating with new variables block
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
@@ -513,6 +536,7 @@ public class TreeBuilder {
 				
 				// old block vars
 				storage_vars.pop();
+				storage_subs.pop();
 			}
 			break;
 		}
@@ -520,6 +544,7 @@ public class TreeBuilder {
 		case latteParser.TOP_DEF: {
 			// new block vars
 			storage_vars.push(new HashMap<String, Integer>());
+			storage_subs.push(new HashMap<String, Integer>());
 
 			// checking args integrity
 			CommonTree args = children.get(2);
@@ -530,10 +555,15 @@ public class TreeBuilder {
 					CommonTree arg = argsToLoad.get(i);
 					String ident = arg.getChild(1).getText();
 					int type = arg.getChild(0).getType();
+					int arr_type = 0;
+					if (type == latteParser.ARRTYPE) {
+						arr_type = arg.getChild(0).getChild(0).getType(); 
+					}
 					if (lookupVar(arg.getChild(1).getText()) != -1) {
 						throw new LatteException("Duplicated argument name in function", (CommonTree)arg.getChild(1));
 					}
 					storage_vars.peek().put(ident, type);
+					storage_subs.peek().put(ident, arr_type);
 				}
 				checkTypes(children.get(3));
 			} else {
@@ -542,11 +572,47 @@ public class TreeBuilder {
 			
 			// old block vars
 			storage_vars.pop();
+			storage_subs.pop();
 			break;
 		}
 
+		case latteParser.SFOR: {
+			break;
+		}
+		
+		case latteParser.ARRTYPE: {
+			return latteParser.ARRTYPE;
+		}
+		
+		case latteParser.NEWARR: {
+			return latteParser.ARRTYPE;
+		}
+		
+		case latteParser.SUBSCRIB: {
+			int type = lookupSubs(children.get(0).getChild(0).getText());
+			return type;
+		}
+		
+		case latteParser.ATTRIBUTE: {
+			int type = checkTypes(children.get(0));
+			if (type == latteParser.ARRTYPE) {
+				String attrName = children.get(1).token.getText();
+				if (attrName.compareTo("length") == 0) {
+					return latteParser.TYPE_INT;
+				} else {
+					throw new LatteException("Wrong attribute.", children.get(0));
+				}
+			} else {
+				throw new LatteException("Object has no attributes.", children.get(0));
+			}
+		}
+		
 		case latteParser.DECL: {
 			int type = children.get(0).token.getType();
+			int arr_type = 0;
+			if (type == latteParser.ARRTYPE) {
+				arr_type = children.get(0).getChild(0).getType(); 
+			}
 			for(int i = 1; i < children.size(); i++) {
 				CommonTree child = children.get(i);
 				@SuppressWarnings("unchecked")
@@ -559,12 +625,18 @@ public class TreeBuilder {
 				
 				if (child.token.getType() == latteParser.INIT) {
 					int currType = checkTypes(declaration.get(1));
-					if (type != currType) {
+					if (currType == latteParser.ARRTYPE) {
+						int curr_arr_type = getArrType(declaration.get(1));
+						if (arr_type != curr_arr_type) {
+							throw new LatteException("Type mismatch in declaration", child);
+						}
+					} else if (type != currType) {
 						throw new LatteException("Type mismatch in declaration", child);
 					}
 				}
 
 				storage_vars.peek().put(ident, type);
+				storage_subs.peek().put(ident, arr_type);
 			}
 			break;
 		}
@@ -589,6 +661,36 @@ public class TreeBuilder {
 		}
 
 		return token_type;
+	}
+
+	private int getArrType(CommonTree root) {		
+		int token_type = -1;
+		if (root.token != null) {
+			token_type = root.token.getType();
+		}
+		@SuppressWarnings("unchecked")
+		List<CommonTree> children = root.getChildren();
+	
+		switch (token_type) {
+		case latteParser.ARRTYPE: {
+			int arr_type = children.get(0).getChild(0).getType(); // TODO: check!
+			return arr_type;
+		}
+		
+		case latteParser.NEWARR: {
+			int arr_type = children.get(0).token.getType();
+			return arr_type;
+		}
+
+		case latteParser.EAPP: {
+			String funName = children.get(0).token.getText();
+			CommonTree func = storage_func.get(funName);
+			int arr_type = func.getChild(0).getChild(0).getType();
+			return arr_type;
+		}
+		
+		}
+		return 0;
 	}
 
 	private int checkReadInt(List<CommonTree> children) throws LatteException {

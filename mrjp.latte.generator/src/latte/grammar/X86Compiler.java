@@ -1,6 +1,7 @@
 package latte.grammar;
 
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,6 +25,7 @@ public class X86Compiler {
 	private CommonTree troot;
 	FileWriter fwriter;
 	BufferedWriter output;
+	int globalVarShift = 0;
 	File fout;
 	
 	public X86Compiler(
@@ -243,6 +245,10 @@ public class X86Compiler {
 			}
 			break;
 		}
+		case latteParser.SFOR: {
+			int count = X86CountLocals(children.get(2));
+			return count + 8; // var + counter
+		}
 		default: {
 			if (children != null) {
 				for (Iterator<CommonTree> i = children.iterator(); i.hasNext();) {
@@ -396,6 +402,26 @@ public class X86Compiler {
 					}
 					break;
 				}
+				case latteParser.ARRTYPE: {
+					if (declaration.size() == 2) {
+					    String len = X86traverse((CommonTree)declaration.get(1).getChild(1));
+						X86write("movl", len+", %ecx");
+						X86write("movl", len+", %edx");
+					    X86write("imul", "$4, %edx");
+					    X86write("addl", "$4, %edx");
+						X86write("movl", "%edx, (%esp)");
+						X86write("call", "malloc");
+						X86write("movl", "%eax, "+freeIdShift+"(%ebp)");
+						len = X86traverse((CommonTree)declaration.get(1).getChild(1));
+						X86write("movl", len+", (%eax)");
+					} else {
+						X86write("movl", "$4, (%esp)");
+						X86write("call", "malloc");
+						X86write("movl", "%eax, "+freeIdShift+"(%ebp)");
+						X86write("movl", "$0, (%eax)");
+					}
+					break;
+				}
 				default:
 					break;
 				}
@@ -526,15 +552,32 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.ASS: {
-			String src = X86traverse(children.get(1));
-			String idName = children.get(0).getText();
-			int idNo = X86VarToId(idName);
-			if (src.contains("%ebp")) {
+			if (children.get(0).getType() == latteParser.SUBSCRIB) {
+				String src2 = X86traverse(children.get(1));
+				X86write("movl", src2+", %eax");
+				X86write("pushl", "%eax");
+
+				String src = X86traverse((CommonTree)children.get(0).getChild(0));
 				X86write("movl", src+", %eax");
-				src = "%eax";
+				String ind = X86traverse((CommonTree)children.get(0).getChild(1));
+				X86write("movl", ind+", %edx");
+				X86write("addl", "$1, %edx");
+				X86write("imul", "$4, %edx");
+				X86write("addl", "%edx, %eax");
+				X86write("popl", "%edx");
+				X86write("movl", "%edx, (%eax)");
+				break;
+			} else {
+				String src = X86traverse(children.get(1));
+				String idName = children.get(0).getChild(0).getText();
+				int idNo = X86VarToId(idName);
+				if (src.contains("%ebp")) {
+					X86write("movl", src+", %eax");
+					src = "%eax";
+				}
+				X86write("movl", src+", "+idNo+"(%ebp)");
+				break;
 			}
-			X86write("movl", src+", "+idNo+"(%ebp)");
-			break;
 		}
 		case latteParser.DECR: {
 			String idName = children.get(0).getText();
@@ -561,6 +604,81 @@ public class X86Compiler {
 			X86write("pop", "%ebp");
 			X86write("ret", 2);
 			break;
+		}
+		case latteParser.SFOR: {
+			storage_vars.push(new HashMap<String, Integer>());
+			storage_var_types.push(new HashMap<String, String>());
+
+			X86traverse(children.get(0));
+			String tabIdent = children.get(1).getText();
+			int counterid = X86FreeVarId(storage_vars);
+			int varid = counterid + 4;
+			globalVarShift += 1;
+			
+		    X86write("movl", "$0, "+counterid+"(%ebp)");
+
+			String whilebodyLabel = X86NextLabel();
+			String endwhileLabel = X86NextLabel();
+			X86write(whilebodyLabel+" :");
+
+			int idNo = X86VarToId(tabIdent);
+			X86write("movl", idNo+"(%ebp), %ecx");
+			X86write("movl", "(%ecx), %eax"); // array length in eax
+
+			String elseLabel = X86NextLabel();
+			String endifLabel = X86NextLabel();
+			X86write("cmp", counterid+"(%ebp), %eax");
+			X86write("jg", elseLabel);
+		    X86write("movl", "$0, %eax");
+			X86write("jmp", endifLabel);
+			X86write(elseLabel+" :");
+		    X86write("movl", "$1, %eax");
+			X86write(endifLabel+" :"); // bool condition in eax
+			
+			X86write("cmp", "$1, %eax");
+			X86write("jne", endwhileLabel);
+
+			X86write("movl", idNo+"(%ebp), %ecx");
+			X86write("movl", counterid+"(%ebp), %edx");
+			X86write("addl", "$1, %edx");
+			X86write("imul", "$4, %edx");
+			X86write("addl", "%edx, %ecx");
+			X86write("movl", "(%ecx), %eax");
+		    X86write("movl", "%eax, "+varid+"(%ebp)");
+			
+			X86traverse(children.get(2)); // loop body
+
+			X86write("addl", "$1, "+counterid+"(%ebp)"); // counter increment
+
+			X86write("jmp", whilebodyLabel);
+			X86write(endwhileLabel+" :");
+
+			storage_vars.pop();
+			storage_var_types.pop();
+			globalVarShift -= 1;
+			break;
+		}
+		case latteParser.ARRTYPE: {
+			break;
+		}
+		case latteParser.NEWARR: {
+			break;
+		}
+		case latteParser.SUBSCRIB: {
+			String src = X86traverse(children.get(0));
+			X86write("movl", src+", %eax");
+			String ind = X86traverse(children.get(1));
+			X86write("movl", ind+", %edx");
+			X86write("addl", "$1, %edx");
+			X86write("imul", "$4, %edx");
+			X86write("addl", "%edx, %eax");
+			return "(%eax)";
+		}
+		case latteParser.ATTRIBUTE: {
+			String src = X86traverse(children.get(0));
+			X86write("movl", src+", %ecx");
+			X86write("movl", "(%ecx), %eax");
+			return "%eax";
 		}
 		case latteParser.OP_PLUS: {
 			String type = X86CheckPlusOpType(children.get(0));
@@ -825,6 +943,7 @@ public class X86Compiler {
 			HashMap<String, Integer> locVar = vars.get(i);
 			freeId += locVar.size();
 		}
+		freeId += globalVarShift;
 		return -1 * (freeId * 4 + 4);
 	}
 		
