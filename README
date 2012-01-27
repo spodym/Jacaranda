@@ -24,16 +24,16 @@ III. Third iteration of project:
 
 2. Optimizations
     - calculating exact space in frame for variables
-    - inlining functions
 
 3. Addons
     - arrays
 
 How to run?
 $ make
-$ ./latte.sh path_to_latte_file.lat
-$ # here we get eventuall errors if analyss went wrong
-$ # othervise output is clean
+$ # compiling to JVM
+$ ./latte_jvm.sh path_to_latte_file.lat
+$ # compiling to x86
+$ ./latte_x86.sh path_to_latte_file.lat
 
 http://www.mimuw.edu.pl/~ben/Zajecia/Mrj2011/Latte/ - project site
 http://en.wikipedia.org/wiki/Jacaranda - random name for project
