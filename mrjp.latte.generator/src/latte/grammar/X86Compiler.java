@@ -384,6 +384,10 @@ public class X86Compiler {
 				case latteParser.TYPE_BOOLEAN: {
 					if (declaration.size() == 2) {
 					    String src = X86traverse(declaration.get(1));
+						if (src.contains("%ebp") || src.contains("(")) {
+							X86write("movl", src+", %eax");
+							src = "%eax";
+						}
 					    X86write("movl", src+", "+freeIdShift+"(%ebp)");
 					} else {
 					    X86write("movl", "$0, "+freeIdShift+"(%ebp)");
@@ -404,16 +408,24 @@ public class X86Compiler {
 				}
 				case latteParser.ARRTYPE: {
 					if (declaration.size() == 2) {
-					    String len = X86traverse((CommonTree)declaration.get(1).getChild(1));
-						X86write("movl", len+", %ecx");
-						X86write("movl", len+", %edx");
-					    X86write("imul", "$4, %edx");
-					    X86write("addl", "$4, %edx");
-						X86write("movl", "%edx, (%esp)");
-						X86write("call", "malloc");
-						X86write("movl", "%eax, "+freeIdShift+"(%ebp)");
-						len = X86traverse((CommonTree)declaration.get(1).getChild(1));
-						X86write("movl", len+", (%eax)");
+						String len = "";
+						if (declaration.get(1).getType() == latteParser.NEWARR) {
+							len = X86traverse((CommonTree)declaration.get(1).getChild(1));
+							X86write("mov", len+", %eax");
+						    X86write("imull", "$4, %eax");
+						    X86write("addl", "$4, %eax");
+							X86write("movl", "%eax, (%esp)");
+							X86write("call", "malloc");
+							X86write("movl", "%eax, "+freeIdShift+"(%ebp)");
+							X86write("movl", freeIdShift+"(%ebp), %eax");
+							len = X86traverse((CommonTree)declaration.get(1).getChild(1));
+						    X86write("movl", len+", %edx");
+							//X86write("addl", "$0, %eax");
+							X86write("movl", "%edx, (%eax)");
+						} else {
+							len = X86traverse(declaration.get(1));
+						    X86write("movl", len+", "+freeIdShift+"(%ebp)");
+						}
 					} else {
 						X86write("movl", "$4, (%esp)");
 						X86write("call", "malloc");
@@ -557,10 +569,10 @@ public class X86Compiler {
 				X86write("movl", src2+", %eax");
 				X86write("pushl", "%eax");
 
-				String src = X86traverse((CommonTree)children.get(0).getChild(0));
-				X86write("movl", src+", %eax");
 				String ind = X86traverse((CommonTree)children.get(0).getChild(1));
 				X86write("movl", ind+", %edx");
+				String src = X86traverse((CommonTree)children.get(0).getChild(0));
+				X86write("movl", src+", %eax");
 				X86write("addl", "$1, %edx");
 				X86write("imul", "$4, %edx");
 				X86write("addl", "%edx, %eax");
@@ -571,7 +583,7 @@ public class X86Compiler {
 				String src = X86traverse(children.get(1));
 				String idName = children.get(0).getChild(0).getText();
 				int idNo = X86VarToId(idName);
-				if (src.contains("%ebp")) {
+				if (src.contains("%ebp") || src.contains("(")) {
 					X86write("movl", src+", %eax");
 					src = "%eax";
 				}
@@ -665,10 +677,10 @@ public class X86Compiler {
 			break;
 		}
 		case latteParser.SUBSCRIB: {
-			String src = X86traverse(children.get(0));
-			X86write("movl", src+", %eax");
 			String ind = X86traverse(children.get(1));
 			X86write("movl", ind+", %edx");
+			String src = X86traverse(children.get(0));
+			X86write("movl", src+", %eax");
 			X86write("addl", "$1, %edx");
 			X86write("imul", "$4, %edx");
 			X86write("addl", "%edx, %eax");
@@ -676,8 +688,8 @@ public class X86Compiler {
 		}
 		case latteParser.ATTRIBUTE: {
 			String src = X86traverse(children.get(0));
-			X86write("movl", src+", %ecx");
-			X86write("movl", "(%ecx), %eax");
+			X86write("movl", src+", %eax");
+			X86write("movl", "(%eax), %eax");
 			return "%eax";
 		}
 		case latteParser.OP_PLUS: {

@@ -18,8 +18,9 @@ import org.antlr.runtime.tree.CommonTree;
 public class Jacaranda {
 
 	public static void main(String[] args) {
-		
-		String file_path = args[0];
+
+		String jvm_or_x86 = args[0];
+		String file_path = args[1];
 		
 		String file_data;
 		try {
@@ -27,8 +28,13 @@ public class Jacaranda {
 			TreeBuilder builder = new TreeBuilder();
 			CommonTree tree = builder.buildTree(file_data);
 			builder.checkType(tree);
-			X86Compiler x86 = new X86Compiler(getFileName(file_path), tree);
-			x86.X86generate();
+			if (jvm_or_x86.compareTo("jvm") == 0) {
+				JVMCompiler jvm = new JVMCompiler(getFileName(file_path), tree);
+				jvm.JVMgenerate();
+			} else {
+				X86Compiler x86 = new X86Compiler(getFileName(file_path), tree);
+				x86.X86generate();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RecognitionException e) {
