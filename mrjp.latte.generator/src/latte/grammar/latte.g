@@ -23,6 +23,7 @@ tokens {
     COND;
     SWHILE;
     SFOR;
+    EMPTY;
     
     EAPP;
     EMUL;
@@ -93,7 +94,7 @@ stmt
     | sexp
     ;
 empty
-    : ';'!
+    : lc=';'  -> ^(EMPTY[$lc,"EMPTY"])
     ;
 bstmt
     : block
