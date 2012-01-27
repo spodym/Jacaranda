@@ -257,6 +257,12 @@ public class JVMCompiler {
 				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
 				JVMtraverse(children.get(1));
 				JVMwrite("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
+			} else if (functionName.compareTo("error") == 0) {
+				JVMwrite("getstatic java/lang/System/out Ljava/io/PrintStream;", 1);
+				JVMwrite("ldc \"runtime error\"", 1);
+				JVMwrite("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V", 1);
+				JVMwrite("iconst_0", 1);
+				JVMwrite("invokestatic java/lang/System/exit(I)V", 1);
 			} else if (functionName.compareTo("readInt") == 0) {
 				int freeId = JVMFreeVarId(storage_vars);
 				int freeId2 = freeId + 1;

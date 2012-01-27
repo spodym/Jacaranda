@@ -268,6 +268,7 @@ public class TreeBuilder {
 		storage_func.put("printInt", null);
 		storage_func.put("readString", null);
 		storage_func.put("readInt", null);
+		storage_func.put("error", null);
 		
 		if (root.token == null) {
 			@SuppressWarnings("unchecked")
@@ -458,6 +459,9 @@ public class TreeBuilder {
 			}
 			if (funName.compareTo("readInt") == 0) { 
 				return checkReadInt(children); 
+			}
+			if (funName.compareTo("error") == 0) { 
+				return latteParser.TYPE_VOID;
 			}
 
 			CommonTree func = storage_func.get(funName);
