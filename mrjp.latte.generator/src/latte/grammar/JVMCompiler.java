@@ -157,7 +157,7 @@ public class JVMCompiler {
 			CommonTree args = children.get(2);
 		    JVMwrite("");
 			JVMwrite(".method public static " + storage_func.get(name));
-		    JVMwrite(".limit stack 5", 1);
+		    JVMwrite(".limit stack 50", 1);
 		    JVMwrite(".limit locals 100", 1);
 		    
 		    // Traversing function body.
@@ -329,7 +329,7 @@ public class JVMCompiler {
 		}
 		case latteParser.ASS: {
 			JVMtraverse(children.get(1));
-			String idName = children.get(0).getText();
+			String idName = children.get(0).getChild(0).getText();
 			int idNo = JVMVarToId(idName);
 			String type = JVMGetVarType(idName);
 			JVMwrite(type + "store " + idNo, 1);
@@ -562,10 +562,17 @@ public class JVMCompiler {
 		if (node.getType() == latteParser.VAR_IDENT) {
 			String idName = node.getChild(0).getText();
 			type = JVMGetVarType(idName);
+		} else if (node.getType() == latteParser.EAPP) {
+			String functionName = node.getChild(0).getText();
+			type = storage_func.get(functionName);
 		} else if (node.getType() == latteParser.STRING) {
 			type = "a";
 		} else if (node.getType() == latteParser.OP_PLUS) {
 			type = JVMCheckPlusOpType((CommonTree)node.getChild(0));
+		}
+		
+		if (type.contains("String;")) {
+			type = "a";
 		}
 		return type;
 	}

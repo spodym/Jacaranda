@@ -44,6 +44,9 @@ public class TreeBuilder {
 				List<CommonTree> topdef = fun.getChildren();
 	
 				int expectedReturn = topdef.get(0).token.getType();
+				if (expectedReturn == latteParser.TYPE_VOID) {
+					continue;
+				}
 				CommonTree blockLookup;
 				if (topdef.get(2).token.getType() == latteParser.BLOCK) {
 					blockLookup = topdef.get(2);
